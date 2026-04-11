@@ -142,7 +142,7 @@ class DailySummaryService:
     ) -> bool:
         """刷新单个 PR 的状态"""
         try:
-            pr_detail = await self.github_client.get_pr(owner, repo, pr.pr_number)
+            pr_detail = await self.github_client.get_pr_detail(owner, repo, pr.pr_number)
             if not pr_detail:
                 return False
 
@@ -674,7 +674,7 @@ class DailySummaryService:
 
         if config and config.config_value:
             prompts = config.config_value
-            return prompts.get(project, prompts.get('combined', ''))
+            return prompts.get(project, '')
 
         # 默认提示词
         return f"""你是一名专业的 {project} 项目分析师。请根据以下数据生成项目动态总结和分析。

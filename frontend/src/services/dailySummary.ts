@@ -54,7 +54,6 @@ export interface SystemPromptConfig {
   prompts: {
     ascend: string
     vllm: string
-    combined: string
   }
   description: string
 }

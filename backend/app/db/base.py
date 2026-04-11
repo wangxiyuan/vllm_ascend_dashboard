@@ -17,7 +17,7 @@ _is_sqlite = "sqlite" in settings.DATABASE_URL
 # 创建异步数据库引擎
 # 增加连接池大小以避免连接耗尽
 engine_kwargs = {
-    "echo": settings.DEBUG,
+    "echo": False,  # 关闭 SQL 查询日志
 }
 
 if _is_sqlite:

@@ -415,7 +415,7 @@ function ProjectBoard() {
                 {/* 主分支版本 */}
                 <Col span={24}>
                   <Card
-                    title="主分支 vLLM 版本"
+                    title="主分支的vLLM 版本"
                     loading={versionsLoading}
                   >
                     {mainVersions && (

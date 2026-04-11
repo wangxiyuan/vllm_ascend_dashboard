@@ -34,6 +34,11 @@ logging.basicConfig(
     stream=sys.stdout,
 )
 
+# 降低第三方库日志级别，避免打印无用信息
+logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+logging.getLogger("aiosqlite").setLevel(logging.WARNING)
+logging.getLogger("apscheduler.scheduler").setLevel(logging.WARNING)
+
 logger = logging.getLogger(__name__)
 
 

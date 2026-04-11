@@ -893,7 +893,6 @@ async def get_system_prompt_config(
     返回各项目的系统提示词配置：
     - ascend: vLLM Ascend 项目提示词
     - vllm: vLLM 项目提示词
-    - combined: 通用提示词模板
     """
     from app.models import ProjectDashboardConfig
 
@@ -906,40 +905,32 @@ async def get_system_prompt_config(
 
         # 默认系统提示词
         default_prompts = {
-            "ascend": """你是一名专业的 vLLM Ascend 项目分析师。请根据以下数据生成项目动态总结和分析。
+            "ascend": """你是一名专业的 vLLM Ascend 项目技术分析师。请根据以下数据生成项目动态总结和分析。
 
 要求：
-1. 总结 PR 趋势，包括主要贡献者、热门修改领域、重要 PR 概述
+1. 总结 PR 趋势，包括热门修改领域、重要 PR 概述
 2. 分析 Issue 热点，包括问题类型分布、用户反馈热点、需要关注的问题
 3. 分析 Commit 活跃度，包括提交频率、代码变更热点
 4. 综合以上信息，生成项目整体动态总结，包括：
    - 项目活跃度评估
    - 重要更新和里程碑
    - 需要关注的风险或问题
-   - 社区参与度分析
 5. 使用 Markdown 格式，语言为中文
-6. 结构清晰，重点突出，便于快速了解项目动态""",
+6. 结构清晰，重点突出，便于快速了解当日技术动态
+7. 重点PR/ISSUE/COMMIT附带ID和github链接""",
             "vllm": """你是一名专业的 vLLM 项目分析师。请根据以下数据生成项目动态总结和分析。
 
 要求：
-1. 总结 PR 趋势，包括主要贡献者、热门修改领域、重要 PR 概述
+1. 总结 PR 趋势，包括热门修改领域、重要 PR 概述
 2. 分析 Issue 热点，包括问题类型分布、用户反馈热点、需要关注的问题
 3. 分析 Commit 活跃度，包括提交频率、代码变更热点
 4. 综合以上信息，生成项目整体动态总结，包括：
    - 项目活跃度评估
    - 重要更新和里程碑
    - 需要关注的风险或问题
-   - 社区参与度分析
 5. 使用 Markdown 格式，语言为中文
-6. 结构清晰，重点突出，便于快速了解项目动态""",
-            "combined": """你是一名专业的开源项目分析师。请根据以下数据生成项目动态总结和分析。
-
-要求：
-1. 总结 PR 趋势，包括主要贡献者、热门修改领域
-2. 分析 Issue 热点，包括问题类型分布、用户反馈热点
-3. 分析 Commit 活跃度，包括提交频率、代码变更热点
-4. 综合以上信息，生成项目整体动态总结
-5. 使用 Markdown 格式，语言为中文""",
+6. 结构清晰，重点突出，便于快速了解当日技术动态
+7. 重点PR/ISSUE/COMMIT附带ID和github链接""",
         }
 
         if config and config.config_value:
@@ -975,8 +966,7 @@ async def update_system_prompt_config(
     {
         "prompts": {
             "ascend": "自定义的 ascend 项目提示词...",
-            "vllm": "自定义的 vllm 项目提示词...",
-            "combined": "通用提示词模板..."
+            "vllm": "自定义的 vllm 项目提示词..."
         }
     }
     """

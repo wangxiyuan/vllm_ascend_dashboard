@@ -757,15 +757,6 @@ function SystemConfig() {
               </div>
             ),
           },
-          {
-            key: 'combined',
-            label: <Tag color="green">通用提示词模板</Tag>,
-            children: (
-              <div style={{ maxHeight: 200, overflow: 'auto' }}>
-                <Text>{systemPromptConfig?.prompts?.combined || '未配置'}</Text>
-              </div>
-            ),
-          },
         ]}
       />
     </Card>
@@ -1285,7 +1276,6 @@ function SystemConfig() {
           initialValues={{
             ascend: systemPromptConfig?.prompts?.ascend || '',
             vllm: systemPromptConfig?.prompts?.vllm || '',
-            combined: systemPromptConfig?.prompts?.combined || '',
           }}
         >
           <Form.Item
@@ -1305,16 +1295,6 @@ function SystemConfig() {
             <Input.TextArea
               rows={6}
               placeholder="用于 vLLM 项目动态总结的系统提示词..."
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="combined"
-            label={<Tag color="green">通用提示词模板</Tag>}
-          >
-            <Input.TextArea
-              rows={6}
-              placeholder="通用系统提示词模板..."
             />
           </Form.Item>
 
