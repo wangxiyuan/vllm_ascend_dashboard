@@ -1,0 +1,176 @@
+# Production Docker Compose Configuration for vLLM Ascend Dashboard
+# Features:
+# - External volumes for persistent data
+# - External configuration files
+# - MySQL database for production
+# - Health checks and auto-restart
+# - Network isolation
+# - Resource limits
+
+services:
+  # Backend API Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: vllm-dashboard-backend
+    env_file:
+      - .env.production
+    environment:
+      # Database connection (MySQL)
+      - DATABASE_URL=mysql+aiomysql://${MYSQL_USER:-dashboard}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE:-vllm_dashboard}
+      # Runtime overrides
+      - ENVIRONMENT=production
+      - DEBUG=false
+    volumes:
+      # Persistent data directory - survives container restarts
+      # This includes /app/data/repos for git cache
+      - backend_data:/app/data
+      # Log files
+      - backend_logs:/app/logs
+      # Optional: external configuration file
+      - ./deploy/config/backend.env:/app/.env:ro
+    # Do NOT expose backend port to public - only accessible via nginx proxy
+    # ports:
+    #   - "${BACKEND_PORT:-8000}:8000"
+    networks:
+      - dashboard-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      mysql:
+        condition: service_healthy
+    # Resource limits for production
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    profiles:
+      - full
+
+  # MySQL Database Service (Production)
+  mysql:
+    image: mysql:8.0
+    container_name: vllm-dashboard-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-vllm_dashboard}
+      - MYSQL_USER=${MYSQL_USER:-dashboard}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      # Persistent MySQL data - survives container restarts
+      - mysql_data:/var/lib/mysql
+      # Optional: custom MySQL configuration
+      - ./deploy/config/mysql.cnf:/etc/mysql/conf.d/custom.cnf:ro
+      # Optional: initialization scripts
+      - ./deploy/mysql/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    networks:
+      - dashboard-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    # Resource limits for MySQL
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    profiles:
+      - full
+
+  # Frontend Web Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        # Use relative path for API - nginx will proxy to backend
+        - VITE_API_BASE_URL=/api/v1
+    container_name: vllm-dashboard-frontend
+    environment:
+      - VITE_API_BASE_URL=/api/v1
+    volumes:
+      # Optional: custom nginx configuration
+      - ./deploy/config/nginx.conf:/etc/nginx/conf.d/custom.conf:ro
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - dashboard-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    # Resource limits for frontend
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    profiles:
+      - full
+
+# Named Volumes - Data persists outside container lifecycle
+volumes:
+  # Backend application data (SQLite database, cache, etc.)
+  # Git repository cache is stored in /app/data/repos (subdirectory of backend_data)
+  backend_data:
+    driver: local
+    # Optional: specify external mount point
+    # driver_opts:
+    #   type: none
+    #   o: bind
+    #   device: /mnt/data/vllm_dashboard/backend_data
+
+  # Backend application logs
+  backend_logs:
+    driver: local
+    # Optional: specify external mount point
+    # driver_opts:
+    #   type: none
+    #   o: bind
+    #   device: /var/log/vllm_dashboard
+
+  # MySQL database data
+  mysql_data:
+    driver: local
+    # Optional: specify external mount point
+    # driver_opts:
+    #   type: none
+    #   o: bind
+    #   device: /mnt/data/vllm_dashboard/mysql_data
+
+# Network Configuration
+networks:
+  dashboard-network:
+    driver: bridge
+    # Optional: specify subnet
+    # ipam:
+    #   config:
+    #     - subnet: 172.28.0.0/16

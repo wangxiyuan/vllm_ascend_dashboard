@@ -1,0 +1,169 @@
+import axios, { AxiosError, AxiosResponse } from 'axios'
+
+// 获取 API 基础 URL - 使用简单的方式避免 TypeScript 错误
+const API_BASE_URL = (typeof import.meta !== 'undefined' &&
+  (import.meta as any).env?.VITE_API_BASE_URL) || 'http://localhost:8000/api/v1'
+
+// 创建 axios 实例
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 60000, // 默认 60 秒超时
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  // 生产环境优化：禁用 withCredentials 除非需要
+  withCredentials: false,
+})
+
+// 创建用于长耗时操作的 axios 实例（如 AI 生成）
+export const longTimeoutApiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 600000, // 10 分钟超时，用于 AI 生成等长耗时操作
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: false,
+})
+
+// 为长超时客户端添加 token 拦截器
+longTimeoutApiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    console.error('Long timeout request interceptor error:', error)
+    return Promise.reject(error)
+  }
+)
+
+// 是否正在刷新 token 的标志
+let isRefreshing = false
+// 刷新 token 后需要重试的请求队列
+let refreshSubscribers: ((token: string) => void)[] = []
+
+// 添加到重试队列
+const subscribeTokenRefresh = (cb: (token: string) => void) => {
+  refreshSubscribers.push(cb)
+}
+
+// 执行重试队列
+const onTokenRefreshed = (token: string) => {
+  refreshSubscribers.forEach(cb => cb(token))
+  refreshSubscribers = []
+}
+
+// 请求拦截器 - 添加 Token
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    console.error('Request interceptor error:', error)
+    return Promise.reject(error)
+  }
+)
+
+// 响应拦截器 - 处理错误和 token 刷新
+apiClient.interceptors.response.use(
+  (response: AxiosResponse) => response,
+  async (error: AxiosError<{ detail?: string }>) => {
+    // 更详细的错误日志
+    console.error('API Error:', {
+      status: error.response?.status,
+      url: error.config?.url,
+      method: error.config?.method,
+      detail: error.response?.data?.detail,
+    })
+
+    const originalRequest = error.config as any
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      // 如果是重复刷新 token 的请求，或者没有 refresh token，跳转登录
+      if (originalRequest.url?.includes('/auth/refresh')) {
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('refresh_token')
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login'
+        }
+        return Promise.reject(error)
+      }
+
+      // 检查是否有 refresh token，没有则不自动刷新（允许公开访问的 API 返回 401）
+      const refreshToken = localStorage.getItem('refresh_token')
+      if (!refreshToken) {
+        return Promise.reject(error)
+      }
+
+      originalRequest._retry = true
+
+      // 如果正在刷新 token，将请求加入队列
+      if (isRefreshing) {
+        return new Promise((resolve) => {
+          subscribeTokenRefresh((token: string) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`
+            resolve(apiClient(originalRequest))
+          })
+        })
+      }
+
+      isRefreshing = true
+
+      try {
+        // 使用刷新 token 获取新的 access token
+        const response = await axios.post(
+          `${API_BASE_URL}/auth/refresh`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${refreshToken}`,
+            },
+          }
+        )
+
+        const { access_token, refresh_token: new_refresh_token } = response.data
+
+        // 保存新的 token
+        localStorage.setItem('access_token', access_token)
+        localStorage.setItem('refresh_token', new_refresh_token)
+
+        // 执行重试队列
+        onTokenRefreshed(access_token)
+
+        // 重试原请求
+        originalRequest.headers.Authorization = `Bearer ${access_token}`
+        return apiClient(originalRequest)
+      } catch (refreshError) {
+        // 刷新失败，清除 token 并跳转登录页
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('refresh_token')
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login'
+        }
+        return Promise.reject(refreshError)
+      } finally {
+        isRefreshing = false
+      }
+    }
+
+    // 5xx 错误记录详细日志
+    if (error.response?.status && error.response.status >= 500) {
+      console.error('Server error:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+      })
+    }
+
+    return Promise.reject(error)
+  }
+)
+
+export default apiClient

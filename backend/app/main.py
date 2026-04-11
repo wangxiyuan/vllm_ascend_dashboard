@@ -1,0 +1,205 @@
+"""
+vLLM Ascend Dashboard - Backend Application
+"""
+import logging
+import sys
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.api.v1 import (
+    auth,
+    ci,
+    daily_summary,
+    github_activity,
+    job_owners,
+    model_sync_configs,
+    models,
+    performance,
+    project_dashboard,
+    system_config,
+    users,
+    workflows,
+)
+from app.core.config import settings
+from app.db.base import engine
+from app.models import Base
+from app.services.scheduler import start_scheduler, stop_scheduler_async
+
+# 配置日志
+logging.basicConfig(
+    level=getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    stream=sys.stdout,
+)
+
+logger = logging.getLogger(__name__)
+
+
+async def init_db():
+    """初始化数据库表"""
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("Database tables created successfully")
+
+        # 初始化 LLM 提供商默认配置
+        await _init_llm_provider_configs()
+    except Exception as e:
+        logger.error(f"Failed to create database tables: {e}", exc_info=True)
+        raise
+
+
+async def _init_llm_provider_configs():
+    """初始化 LLM 提供商默认配置"""
+    from sqlalchemy import select
+    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+    from app.models.daily_summary import LLMProviderConfig
+
+    # 创建临时会话
+    async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+    async with async_session() as db:
+        try:
+            # 检查是否已有配置
+            stmt = select(LLMProviderConfig)
+            result = await db.execute(stmt)
+            existing = result.scalars().first()
+
+            if existing:
+                logger.info("LLM provider configs already exist, skipping initialization")
+                return
+
+            # 添加默认配置
+            default_configs = [
+                LLMProviderConfig(
+                    provider='openai',
+                    display_name='OpenAI API',
+                    api_base_url='https://api.openai.com/v1',
+                    default_model='gpt-4o',
+                    enabled=True,
+                    is_active=False,
+                    display_order=1,
+                ),
+                LLMProviderConfig(
+                    provider='anthropic',
+                    display_name='Anthropic Claude',
+                    api_base_url='https://api.anthropic.com',
+                    default_model='claude-sonnet-4-20250514',
+                    enabled=True,
+                    is_active=False,
+                    display_order=2,
+                ),
+                LLMProviderConfig(
+                    provider='qwen',
+                    display_name='通义千问',
+                    api_base_url='https://dashscope.aliyuncs.com/compatible-mode/v1',
+                    default_model='qwen-plus',
+                    enabled=True,
+                    is_active=False,
+                    display_order=3,
+                ),
+            ]
+
+            for config in default_configs:
+                db.add(config)
+
+            await db.commit()
+            logger.info("LLM provider configs initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize LLM provider configs: {e}", exc_info=True)
+            await db.rollback()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """应用生命周期管理"""
+    logger.info("Starting vLLM Ascend Dashboard application...")
+    
+    # 启动时初始化数据库
+    await init_db()
+
+    # 启动数据同步调度器
+    try:
+        start_scheduler()
+        logger.info("Scheduler started successfully")
+    except Exception as e:
+        logger.error(f"Failed to start scheduler: {e}", exc_info=True)
+
+    yield
+
+    # 关闭时清理资源
+    logger.info("Shutting down application...")
+    try:
+        await stop_scheduler_async()
+        logger.info("Scheduler stopped successfully")
+    except Exception as e:
+        logger.error(f"Error stopping scheduler: {e}", exc_info=True)
+    
+    try:
+        await engine.dispose()
+        logger.info("Database engine disposed successfully")
+    except Exception as e:
+        logger.error(f"Error disposing database engine: {e}", exc_info=True)
+
+
+def create_app() -> FastAPI:
+    """创建 FastAPI 应用实例"""
+
+    app = FastAPI(
+        title="vLLM Ascend Dashboard API",
+        description="vLLM Ascend 社区看板后端 API",
+        version="0.1.0",
+        docs_url="/docs",
+        redoc_url="/redoc",
+        lifespan=lifespan,
+    )
+
+    # 配置 CORS
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.CORS_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    # 注册路由
+    app.include_router(auth.router, prefix="/api/v1/auth", tags=["认证"])
+    app.include_router(ci.router, prefix="/api/v1/ci", tags=["CI 数据"])
+    app.include_router(daily_summary.router, prefix="/api/v1", tags=["每日总结"])
+    app.include_router(models.router, prefix="/api/v1/models", tags=["模型管理"])
+    app.include_router(model_sync_configs.router, prefix="/api/v1/model-sync-configs", tags=["模型同步配置"])
+    app.include_router(performance.router, prefix="/api/v1/performance", tags=["性能数据"])
+    app.include_router(users.router, prefix="/api/v1/users", tags=["用户管理"])
+    app.include_router(workflows.router, prefix="/api/v1/workflows", tags=["Workflow 配置"])
+    app.include_router(job_owners.router, prefix="/api/v1/job-owners", tags=["Job 责任人"])
+    app.include_router(system_config.router, prefix="/api/v1/system/config", tags=["系统配置"])
+    app.include_router(github_activity.router, prefix="/api/v1/github-activity", tags=["GitHub 动态"])
+    app.include_router(project_dashboard.router, prefix="/api/v1/project-dashboard", tags=["项目看板"])
+
+    @app.get("/health")
+    async def health_check():
+        """健康检查接口"""
+        return {
+            "status": "healthy",
+            "version": "0.1.0",
+            "environment": settings.ENVIRONMENT,
+        }
+
+    return app
+
+
+app = create_app()
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=settings.DEBUG,
+    )

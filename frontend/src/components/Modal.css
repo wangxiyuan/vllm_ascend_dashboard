@@ -1,0 +1,205 @@
+/**
+ * Modal Components - Stripe Design System
+ */
+
+/* Modal Container */
+.stripe-modal .ant-modal-content {
+  border-radius: var(--radius-large);
+  box-shadow: 
+    rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
+    rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+}
+
+/* Modal Header */
+.stripe-modal .ant-modal-header {
+  border-bottom: 1px solid var(--border-default);
+  padding: var(--space-24);
+  border-radius: var(--radius-large) var(--radius-large) 0 0;
+}
+
+.stripe-modal .ant-modal-title {
+  font-family: var(--font-primary);
+  font-size: var(--text-sub-heading-lg);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+  letter-spacing: var(--tracking-sub-lg);
+}
+
+/* Modal Body */
+.stripe-modal .ant-modal-body {
+  padding: var(--space-24);
+}
+
+/* Modal Footer */
+.stripe-modal .ant-modal-footer {
+  border-top: 1px solid var(--border-default);
+  padding: var(--space-16) var(--space-24);
+  border-radius: 0 0 var(--radius-large) var(--radius-large);
+}
+
+.stripe-modal .ant-modal-footer .ant-btn {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  font-feature-settings: "ss01" on;
+  border-radius: var(--radius-standard);
+}
+
+.stripe-modal .ant-modal-footer .ant-btn-primary {
+  background-color: var(--stripe-purple);
+}
+
+.stripe-modal .ant-modal-footer .ant-btn-primary:hover {
+  background-color: var(--stripe-purple-hover);
+}
+
+/* Form Labels in Modal */
+.stripe-modal .ant-form-item-label > label {
+  font-family: var(--font-primary);
+  font-size: var(--text-button-sm);
+  font-weight: var(--weight-regular);
+  color: var(--color-label);
+  font-feature-settings: "ss01" on;
+}
+
+/* Form Inputs in Modal */
+.stripe-modal .ant-input {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+  border-radius: var(--radius-standard);
+  border: 1px solid var(--border-default);
+}
+
+.stripe-modal .ant-input:hover {
+  border-color: var(--border-purple);
+}
+
+.stripe-modal .ant-input:focus {
+  border-color: var(--stripe-purple);
+  box-shadow: 0 0 0 3px rgba(83, 58, 253, 0.1);
+}
+
+.stripe-modal .ant-input::placeholder {
+  color: var(--color-body);
+}
+
+/* Input Password */
+.stripe-modal .ant-input-password {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+}
+
+/* Table in Modal */
+.stripe-modal .ant-table {
+  font-family: var(--font-primary);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-modal .ant-table-thead > tr > th {
+  background-color: #fafafa;
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.stripe-modal .ant-table-tbody > tr > td {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.stripe-modal .ant-table-tbody > tr:hover {
+  background-color: rgba(83, 58, 253, 0.02);
+}
+
+/* Collapse in Modal */
+.stripe-modal .ant-collapse-header {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-modal .ant-collapse-content {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  color: var(--color-body);
+  font-feature-settings: "ss01" on;
+}
+
+/* Descriptions in Modal */
+.stripe-modal .ant-descriptions-item-label {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  color: var(--color-label);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-modal .ant-descriptions-item-content {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+}
+
+/* Tag in Modal */
+.stripe-modal .ant-tag {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  font-feature-settings: "ss01" on;
+  border-radius: var(--radius-standard);
+}
+
+/* Card in Modal */
+.stripe-modal .ant-card {
+  border-radius: var(--radius-comfortable);
+  border: 1px solid var(--border-default);
+  box-shadow: 
+    rgba(50, 50, 93, 0.25) 0px 15px 25px -15px,
+    rgba(0, 0, 0, 0.1) 0px 10px 20px -10px;
+}
+
+/* Text in Modal */
+.stripe-modal .ant-typography {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  color: var(--color-body);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-modal .ant-typography strong {
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stripe-modal .ant-modal-content {
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .stripe-modal .ant-modal-header {
+    padding: var(--space-16);
+  }
+
+  .stripe-modal .ant-modal-body {
+    padding: var(--space-16);
+  }
+
+  .stripe-modal .ant-modal-footer {
+    padding: var(--space-12) var(--space-16);
+  }
+
+  .stripe-modal .ant-modal-title {
+    font-size: var(--text-sub-heading);
+  }
+}

@@ -1,0 +1,267 @@
+/**
+ * GitHub Activity Panel - Stripe Design System
+ */
+
+/* Activity Card */
+.stripe-activity-card {
+  background: #ffffff;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-comfortable);
+  box-shadow: 
+    rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
+    rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+  transition: all 0.3s ease;
+  height: 100%;
+  cursor: pointer;
+}
+
+.stripe-activity-card:hover {
+  box-shadow: 
+    rgba(50, 50, 93, 0.25) 0px 35px 50px -25px,
+    rgba(0, 0, 0, 0.1) 0px 20px 40px -15px;
+  transform: translateY(-2px);
+}
+
+.stripe-activity-card .ant-card-head {
+  border-bottom: 1px solid var(--border-default);
+  padding: var(--space-16) var(--space-20);
+  font-family: var(--font-primary);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-activity-card .ant-card-body {
+  padding: var(--space-20);
+}
+
+/* Activity Card Title */
+.stripe-activity-card-title {
+  font-family: var(--font-primary);
+  font-size: var(--text-sub-heading);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-activity-icon {
+  font-size: 18px;
+}
+
+.stripe-activity-arrow {
+  color: var(--color-body);
+  transition: all 0.2s ease;
+}
+
+.stripe-activity-card:hover .stripe-activity-arrow {
+  color: var(--stripe-purple);
+  transform: translateX(4px);
+}
+
+/* Activity Row */
+.stripe-activity-row {
+  margin: 0;
+}
+
+/* Releases Section */
+.stripe-activity-releases {
+  margin-bottom: var(--space-16);
+}
+
+.stripe-activity-section-label {
+  font-family: var(--font-primary);
+  font-size: var(--text-caption-sm);
+  color: var(--color-body);
+  font-feature-settings: "ss01" on;
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  margin-bottom: var(--space-12);
+}
+
+.stripe-activity-section-icon {
+  font-size: 12px;
+}
+
+.stripe-activity-releases-content {
+  padding-left: var(--space-20);
+}
+
+.stripe-activity-release-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+/* Release Tag */
+.stripe-release-tag {
+  padding: 2px 8px !important;
+  font-size: 10px !important;
+  font-weight: var(--weight-regular) !important;
+  font-family: var(--font-primary) !important;
+  border-radius: var(--radius-standard) !important;
+  border: none !important;
+  font-feature-settings: "ss01" on !important;
+  height: auto !important;
+  line-height: 1.4 !important;
+}
+
+.stripe-release-tag-pre {
+  background-color: rgba(250, 173, 20, 0.2) !important;
+  color: #d48806 !important;
+}
+
+/* Release Link */
+.stripe-release-link {
+  color: var(--deep-navy);
+  text-decoration: none;
+  font-family: var(--font-primary);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  transition: all 0.2s ease;
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-release-link:hover {
+  color: var(--stripe-purple);
+  text-decoration: underline;
+}
+
+/* Release Empty */
+.stripe-release-empty {
+  font-family: var(--font-primary);
+  font-size: var(--text-caption-sm);
+  color: var(--color-body);
+  font-feature-settings: "ss01" on;
+}
+
+/* Detail Page Release Tag - Unified styling for detail page */
+.stripe-detail-release-tag {
+  padding: 2px 8px !important;
+  font-size: 13px !important;
+  font-weight: var(--weight-regular) !important;
+  font-family: var(--font-primary) !important;
+  border-radius: var(--radius-standard) !important;
+  border: none !important;
+  font-feature-settings: "ss01" on !important;
+  height: auto !important;
+  line-height: 1.4 !important;
+  cursor: pointer !important;
+}
+
+/* Activity Stat */
+.stripe-activity-stat {
+  text-align: center;
+  padding: var(--space-12) 0;
+}
+
+.stripe-activity-stat-header {
+  font-family: var(--font-primary);
+  font-size: 11px;
+  font-weight: var(--weight-regular);
+  color: var(--color-body);
+  margin-bottom: var(--space-8);
+  font-feature-settings: "ss01" on;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+/* Stat Icons */
+.stripe-activity-stat-icon {
+  font-size: 12px;
+}
+
+.stripe-activity-stat-icon-pr {
+  color: #1890ff;
+}
+
+.stripe-activity-stat-icon-issue {
+  color: #fa8c16;
+}
+
+.stripe-activity-stat-icon-commit {
+  color: #15be53;
+}
+
+/* Stat Values */
+.stripe-activity-stat-value {
+  font-family: var(--font-primary);
+  font-size: 24px;
+  font-weight: var(--weight-regular);
+  line-height: 1;
+  font-feature-settings: "tnum" on;
+}
+
+.stripe-activity-stat-value-pr {
+  color: #1890ff;
+}
+
+.stripe-activity-stat-value-issue {
+  color: #fa8c16;
+}
+
+.stripe-activity-stat-value-commit {
+  color: #15be53;
+}
+
+/* Stat Footer */
+.stripe-activity-stat-footer {
+  font-family: var(--font-primary);
+  font-size: 10px;
+  font-weight: var(--weight-regular);
+  color: var(--color-body);
+  margin-top: var(--space-6);
+  font-feature-settings: "ss01" on;
+}
+
+/* Loading State */
+.stripe-activity-card-loading {
+  height: 240px;
+}
+
+/* Error Card */
+.stripe-error-card {
+  background: #ffffff;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-comfortable);
+  box-shadow:
+    var(--shadow-blue) 0px 30px 45px -30px,
+    var(--shadow-black) 0px 18px 36px -18px;
+}
+
+.stripe-error-card .ant-card-body {
+  padding: var(--space-20);
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+  .stripe-activity-card .ant-card-head-title {
+    font-size: var(--text-sub-heading);
+  }
+}
+
+@media (max-width: 768px) {
+  .stripe-activity-stat-value {
+    font-size: 20px;
+  }
+  
+  .stripe-activity-stat-header {
+    font-size: 10px;
+  }
+}
+
+/* Ant Design Override */
+.stripe-activity-card .ant-tag {
+  font-family: var(--font-primary);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-activity-card .ant-statistic {
+  font-family: var(--font-primary);
+  font-feature-settings: "tnum" on;
+}
+
+.stripe-activity-card .ant-typography {
+  font-family: var(--font-primary);
+  font-feature-settings: "ss01" on;
+}

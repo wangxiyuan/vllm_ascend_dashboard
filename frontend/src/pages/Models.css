@@ -1,0 +1,282 @@
+/**
+ * Models Page - Stripe Design System
+ */
+
+/* Models Page Container */
+.stripe-models-page {
+  padding: var(--space-24);
+  background-color: #ffffff;
+}
+
+/* Page Header */
+.stripe-page-header {
+  margin-bottom: var(--space-32);
+  padding-bottom: var(--space-24);
+  border-bottom: 1px solid var(--border-default);
+  text-align: left;
+}
+
+.stripe-page-title {
+  font-family: var(--font-primary);
+  font-size: var(--text-section-heading);
+  font-weight: var(--weight-light);
+  color: var(--deep-navy);
+  margin-bottom: var(--space-8) !important;
+  font-feature-settings: "ss01" on;
+  letter-spacing: var(--tracking-section);
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.stripe-page-description {
+  font-family: var(--font-primary);
+  font-size: var(--text-body);
+  color: var(--color-body);
+  font-feature-settings: "ss01" on;
+}
+
+/* Filter Card */
+.stripe-filter-card {
+  margin-bottom: var(--space-24);
+}
+
+/* Search Input */
+.stripe-search-input {
+  width: 300px;
+  height: 40px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-standard);
+  font-family: var(--font-primary);
+  font-size: var(--text-body);
+  font-weight: var(--weight-light);
+  color: var(--deep-navy);
+  transition: all 0.2s ease;
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-search-input::placeholder {
+  color: var(--color-body);
+}
+
+.stripe-search-input:hover {
+  border-color: var(--border-purple);
+}
+
+.stripe-search-input:focus {
+  border-color: var(--stripe-purple);
+  box-shadow: 0 0 0 3px rgba(83, 58, 253, 0.1);
+  outline: none;
+}
+
+.stripe-search-input .ant-input-prefix {
+  color: var(--color-body);
+  margin-right: var(--space-8);
+}
+
+/* Filter Select */
+.stripe-filter-select {
+  width: 200px;
+  min-height: 40px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-standard);
+  font-family: var(--font-primary);
+  font-size: var(--text-body);
+  font-weight: var(--weight-light);
+  color: var(--deep-navy);
+  transition: all 0.2s ease;
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-filter-select .ant-select-selector {
+  border: none !important;
+  box-shadow: none !important;
+  font-family: var(--font-primary) !important;
+  font-feature-settings: "ss01" on !important;
+}
+
+.stripe-filter-select:focus {
+  border-color: var(--stripe-purple);
+  box-shadow: 0 0 0 3px rgba(83, 58, 253, 0.1);
+}
+
+/* Table Card */
+.stripe-table-card {
+  overflow: hidden;
+}
+
+/* Table Styles */
+.stripe-table .ant-table {
+  font-family: var(--font-primary);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-table .ant-table-thead > tr > th {
+  background-color: #fafafa;
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+  border-bottom: 1px solid var(--border-default);
+  padding: var(--space-12) var(--space-16);
+}
+
+.stripe-table .ant-table-tbody > tr > td {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+  border-bottom: 1px solid var(--border-default);
+  padding: var(--space-12) var(--space-16);
+}
+
+.stripe-table .ant-table-tbody > tr:hover {
+  background-color: rgba(83, 58, 253, 0.02);
+}
+
+.stripe-table .ant-table-tbody > tr.stripe-row-clickable {
+  cursor: pointer;
+}
+
+/* Model Name Cell */
+.stripe-model-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.stripe-model-name {
+  font-family: var(--font-primary);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+}
+
+/* Series Tag */
+.stripe-series-tag {
+  padding: 2px 8px !important;
+  font-size: 11px !important;
+  font-weight: var(--weight-regular) !important;
+  font-family: var(--font-primary) !important;
+  border-radius: var(--radius-standard) !important;
+  border: none !important;
+  font-feature-settings: "ss01" on !important;
+}
+
+/* Doc Link */
+.stripe-doc-link {
+  color: var(--stripe-purple);
+  text-decoration: none;
+  font-family: var(--font-primary);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  transition: all 0.2s ease;
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-doc-link:hover {
+  color: var(--stripe-purple-hover);
+  text-decoration: underline;
+}
+
+.stripe-doc-link .anticon {
+  font-size: 12px;
+  margin-left: var(--space-4);
+  transition: transform 0.2s ease;
+}
+
+.stripe-doc-link:hover .anticon {
+  transform: translateX(2px);
+}
+
+/* Status Tag */
+.stripe-status-tag {
+  padding: 2px 8px !important;
+  font-size: 11px !important;
+  font-weight: var(--weight-regular) !important;
+  font-family: var(--font-primary) !important;
+  border-radius: var(--radius-standard) !important;
+  border: none !important;
+  font-feature-settings: "ss01" on !important;
+}
+
+/* Date Text */
+.stripe-date-text {
+  font-family: var(--font-primary);
+  font-size: var(--text-caption-sm);
+  font-weight: var(--weight-regular);
+  color: var(--color-body);
+  font-feature-settings: "tnum" on;
+}
+
+/* Empty Text */
+.stripe-empty-text {
+  color: var(--color-body);
+  opacity: 0.5;
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  font-feature-settings: "ss01" on;
+}
+
+/* Pagination */
+.stripe-table .ant-pagination {
+  font-family: var(--font-primary);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-table .ant-pagination-item {
+  border-radius: var(--radius-standard);
+  border-color: var(--border-default);
+  font-family: var(--font-primary);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-table .ant-pagination-item-active {
+  background-color: var(--stripe-purple);
+  border-color: var(--stripe-purple);
+}
+
+.stripe-table .ant-pagination-item-active a {
+  color: #ffffff;
+}
+
+.stripe-table .ant-pagination-item:hover {
+  border-color: var(--stripe-purple);
+}
+
+.stripe-table .ant-pagination-item:hover a {
+  color: var(--stripe-purple);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .stripe-models-page {
+    padding: var(--space-16);
+  }
+
+  .stripe-page-title {
+    font-size: var(--text-sub-heading-lg);
+  }
+
+  .stripe-search-input {
+    width: 100%;
+  }
+
+  .stripe-filter-select {
+    width: 100%;
+  }
+}
+
+/* Ant Design Override */
+.stripe-card .ant-card-body {
+  padding: var(--space-20);
+}
+
+.stripe-filter-card .ant-card-body {
+  padding: var(--space-20);
+}
+
+.stripe-table-card .ant-card-body {
+  padding: 0;
+}

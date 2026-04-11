@@ -1,0 +1,43 @@
+/* Import Stripe Design System */
+@import './stripe-design.css';
+@import './components/common.css';
+@import './components/Modal.css';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #ffffff;
+  overflow-x: hidden;
+  font-feature-settings: "ss01" on;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* 滚动条样式 - Stripe 风格 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: var(--radius-standard);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-body);
+  border-radius: var(--radius-standard);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--deep-navy);
+}

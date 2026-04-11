@@ -1,0 +1,75 @@
+# Production Dockerfile for vLLM Ascend Dashboard Backend
+# Multi-stage build for optimized image size
+
+# Stage 1: Install dependencies
+FROM python:3.11-slim AS dependencies
+
+WORKDIR /app
+
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# Copy only pyproject.toml (no lockfile needed)
+COPY pyproject.toml ./
+
+# Create virtual environment and install dependencies
+RUN python -m venv /opt/venv && \
+    /opt/venv/bin/pip install --upgrade pip && \
+    uv pip install --python /opt/venv/bin/python \
+        fastapi uvicorn[standard] sqlalchemy aiosqlite aiomysql \
+        pydantic pydantic-settings python-jose[cryptography] \
+        cryptography passlib[bcrypt] httpx apscheduler \
+        python-multipart alembic
+
+
+# Stage 2: Production
+FROM python:3.11-slim AS production
+
+WORKDIR /app
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    git \
+    procps \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home --shell /bin/bash appuser
+
+# Copy virtual environment
+COPY --from=dependencies /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy application code
+COPY app/ ./app/
+
+# Copy scripts directory
+COPY scripts/ ./scripts/
+
+# Copy entrypoint script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Create data and logs directories for persistent storage
+# Note: Permissions will be fixed by entrypoint script after volume mount
+RUN mkdir -p /app/data /app/logs
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    ENVIRONMENT=production \
+    DEBUG=false \
+    HOME=/home/appuser
+
+# Don't switch to non-root user here - entrypoint script handles it
+# USER appuser
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Use entrypoint script to fix permissions and start application
+# Note: ENTRYPOINT runs as root to fix volume permissions, then switches to appuser
+ENTRYPOINT ["/docker-entrypoint.sh"]

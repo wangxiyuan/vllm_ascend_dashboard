@@ -1,0 +1,506 @@
+/**
+ * CI Renderers - Stripe Design System
+ */
+
+/* CI Status/Conclusion Tags */
+.stripe-ci-tag {
+  padding: 2px 12px !important;
+  font-size: 12px !important;
+  font-family: var(--font-primary) !important;
+  font-weight: var(--weight-regular) !important;
+  border-radius: var(--radius-standard) !important;
+  border: none !important;
+  font-feature-settings: "ss01" on !important;
+}
+
+.stripe-ci-empty {
+  color: var(--color-body);
+  font-size: 13px;
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  font-feature-settings: "ss01" on;
+}
+
+/* Hardware Tags */
+.stripe-hardware-tag {
+  padding: 1px 8px !important;
+  font-size: 12px !important;
+  font-weight: var(--weight-regular) !important;
+  font-family: var(--font-primary) !important;
+  border: none !important;
+  border-radius: var(--radius-standard) !important;
+  font-feature-settings: "ss01" on !important;
+}
+
+/**
+ * Page Layout - Stripe Design System
+ */
+
+/* Page Container */
+.stripe-page-container {
+  padding: var(--space-24);
+  background-color: #ffffff;
+  min-height: 100vh;
+}
+
+/* Page Header */
+.stripe-page-header {
+  margin-bottom: var(--space-32);
+  padding-bottom: var(--space-24);
+  border-bottom: 1px solid var(--border-default);
+  text-align: left;
+}
+
+.stripe-page-header-center {
+  text-align: center;
+}
+
+.stripe-page-title {
+  font-family: var(--font-primary);
+  font-size: var(--text-section-heading);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  margin-bottom: var(--space-8) !important;
+  font-feature-settings: "ss01" on;
+  letter-spacing: var(--tracking-section);
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  justify-content: flex-start;
+}
+
+.stripe-page-header-center .stripe-page-title {
+  justify-content: center;
+}
+
+.stripe-page-icon {
+  color: var(--stripe-purple);
+  font-size: 28px;
+}
+
+.stripe-page-description {
+  font-family: var(--font-primary);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  color: var(--color-body);
+  font-feature-settings: "ss01" on;
+}
+
+/* Page Content */
+.stripe-page-content {
+  max-width: 100%;
+}
+
+/* Card Container */
+.stripe-page-card {
+  background: #ffffff;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-comfortable);
+  box-shadow: 
+    rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
+    rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+  margin-bottom: var(--space-24);
+}
+
+/* Tabs - General */
+.stripe-page-tabs .ant-tabs-tab {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-body);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-page-tabs .ant-tabs-tab-active {
+  color: var(--stripe-purple);
+  font-weight: var(--weight-regular);
+}
+
+.stripe-page-tabs .ant-tabs-ink-bar {
+  background-color: var(--stripe-purple);
+}
+
+.stripe-page-tabs .ant-tabs-tab-btn:focus {
+  color: var(--stripe-purple);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stripe-page-container {
+    padding: var(--space-16);
+  }
+
+  .stripe-page-title {
+    font-size: var(--text-sub-heading-lg);
+  }
+}
+
+/**
+ * Common Component Styles - Stripe Design System
+ */
+
+/* Success Badge */
+.stripe-badge-success {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background-color: rgba(21, 190, 83, 0.2);
+  color: var(--success-text);
+  border: 1px solid rgba(21, 190, 83, 0.4);
+  border-radius: var(--radius-standard);
+  font-family: var(--font-primary);
+  font-size: 11px;
+  font-weight: var(--weight-regular);
+  font-feature-settings: "ss01" on;
+}
+
+/* Warning Badge */
+.stripe-badge-warning {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background-color: rgba(250, 173, 20, 0.2);
+  color: #d48806;
+  border: 1px solid rgba(250, 173, 20, 0.4);
+  border-radius: var(--radius-standard);
+  font-family: var(--font-primary);
+  font-size: 11px;
+  font-weight: var(--weight-regular);
+  font-feature-settings: "ss01" on;
+}
+
+/* Error Badge */
+.stripe-badge-error {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background-color: rgba(255, 77, 79, 0.2);
+  color: #d9363e;
+  border: 1px solid rgba(255, 77, 79, 0.4);
+  border-radius: var(--radius-standard);
+  font-family: var(--font-primary);
+  font-size: 11px;
+  font-weight: var(--weight-regular);
+  font-feature-settings: "ss01" on;
+}
+
+/* Info Badge */
+.stripe-badge-info {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background-color: rgba(83, 58, 253, 0.2);
+  color: var(--stripe-purple);
+  border: 1px solid rgba(83, 58, 253, 0.4);
+  border-radius: var(--radius-standard);
+  font-family: var(--font-primary);
+  font-size: 11px;
+  font-weight: var(--weight-regular);
+  font-feature-settings: "ss01" on;
+}
+
+/* Neutral Badge */
+.stripe-badge-neutral {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background-color: #f6f9fc;
+  color: var(--color-body);
+  border: 1px solid rgba(100, 116, 141, 0.2);
+  border-radius: var(--radius-standard);
+  font-family: var(--font-primary);
+  font-size: 11px;
+  font-weight: var(--weight-regular);
+  font-feature-settings: "ss01" on;
+}
+
+/* Data Value Display */
+.stripe-data-value {
+  font-family: var(--font-primary);
+  font-size: var(--text-sub-heading);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+  letter-spacing: var(--tracking-sub);
+}
+
+.stripe-data-label {
+  font-family: var(--font-primary);
+  font-size: var(--text-caption-sm);
+  font-weight: var(--weight-regular);
+  color: var(--color-body);
+  font-feature-settings: "ss01" on;
+}
+
+/* Metric Display */
+.stripe-metric-display {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.stripe-metric-display .stripe-data-value {
+  font-size: var(--text-section-heading);
+}
+
+/* Section Divider */
+.stripe-divider {
+  height: 1px;
+  background-color: var(--border-default);
+  margin: var(--space-24) 0;
+  border: none;
+}
+
+/* Loading State */
+.stripe-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-40);
+  color: var(--color-body);
+  font-family: var(--font-primary);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-default);
+  border-top-color: var(--stripe-purple);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: var(--space-12);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Empty State */
+.stripe-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-40);
+  text-align: center;
+}
+
+.stripe-empty-icon {
+  font-size: 48px;
+  color: var(--color-body);
+  opacity: 0.5;
+  margin-bottom: var(--space-16);
+}
+
+.stripe-empty-text {
+  font-family: var(--font-primary);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  color: var(--color-body);
+  font-feature-settings: "ss01" on;
+}
+
+/* Action Link */
+.stripe-action-link {
+  color: var(--stripe-purple);
+  text-decoration: none;
+  font-family: var(--font-primary);
+  font-size: var(--text-link);
+  font-weight: var(--weight-regular);
+  font-feature-settings: "ss01" on;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.stripe-action-link:hover {
+  color: var(--stripe-purple-hover);
+  text-decoration: underline;
+}
+
+.stripe-action-link .anticon {
+  transition: transform 0.2s ease;
+}
+
+.stripe-action-link:hover .anticon {
+  transform: translateX(2px);
+}
+
+/* Card Grid */
+.stripe-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-24);
+}
+
+/* Page Header */
+.stripe-page-header {
+  margin-bottom: var(--space-32);
+  padding-bottom: var(--space-24);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.stripe-page-title {
+  font-family: var(--font-primary);
+  font-size: var(--text-section-heading);
+  font-weight: var(--weight-light);
+  color: var(--deep-navy);
+  margin-bottom: var(--space-8) !important;
+  font-feature-settings: "ss01" on;
+  letter-spacing: var(--tracking-section);
+}
+
+.stripe-page-description {
+  font-family: var(--font-primary);
+  font-size: var(--text-body);
+  color: var(--color-body);
+  font-feature-settings: "ss01" on;
+}
+
+/* Toolbar */
+.stripe-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-24);
+  padding: var(--space-16);
+  background-color: rgba(83, 58, 253, 0.02);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-large);
+}
+
+.stripe-toolbar-title {
+  font-family: var(--font-primary);
+  font-size: var(--text-sub-heading);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+}
+
+/* Table Styles */
+.stripe-table-wrapper {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-large);
+  overflow: hidden;
+}
+
+.stripe-table thead th {
+  background-color: #fafafa;
+  font-family: var(--font-primary);
+  font-weight: var(--weight-light);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.stripe-table tbody td {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-light);
+  color: var(--color-body);
+  font-feature-settings: "ss01" on;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.stripe-table tbody tr:hover {
+  background-color: rgba(83, 58, 253, 0.02);
+}
+
+/* Modal Styles */
+.stripe-modal .ant-modal-header {
+  border-bottom: 1px solid var(--border-default);
+  padding: var(--space-24);
+}
+
+.stripe-modal .ant-modal-title {
+  font-family: var(--font-primary);
+  font-size: var(--text-sub-heading-lg);
+  font-weight: var(--weight-light);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-modal .ant-modal-body {
+  padding: var(--space-24);
+}
+
+.stripe-modal .ant-modal-footer {
+  border-top: 1px solid var(--border-default);
+  padding: var(--space-16) var(--space-24);
+}
+
+/* Form Styles */
+.stripe-form-group {
+  margin-bottom: var(--space-20);
+}
+
+.stripe-form-label {
+  display: block;
+  margin-bottom: var(--space-8);
+  font-family: var(--font-primary);
+  font-size: var(--text-button-sm);
+  font-weight: var(--weight-regular);
+  color: var(--color-label);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-form-hint {
+  margin-top: var(--space-6);
+  font-family: var(--font-primary);
+  font-size: var(--text-caption-sm);
+  font-weight: var(--weight-regular);
+  color: var(--color-body);
+  font-feature-settings: "ss01" on;
+}
+
+/* Tooltip Styles */
+.stripe-tooltip {
+  font-family: var(--font-primary);
+  font-size: var(--text-caption-sm);
+  font-feature-settings: "ss01" on;
+}
+
+/* Notification Styles */
+.stripe-notification {
+  border-radius: var(--radius-large);
+  border: 1px solid var(--border-default);
+  box-shadow: 
+    rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
+    rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+}
+
+.stripe-notification .ant-notification-notice-message {
+  font-family: var(--font-primary);
+  font-size: var(--text-sub-heading);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-notification .ant-notification-notice-description {
+  font-family: var(--font-primary);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  color: var(--color-body);
+  font-feature-settings: "ss01" on;
+}
+
+/* Responsive Utilities */
+@media (max-width: 768px) {
+  .stripe-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stripe-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-16);
+  }
+
+  .stripe-page-title {
+    font-size: var(--text-sub-heading-lg);
+  }
+}

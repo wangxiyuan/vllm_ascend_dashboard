@@ -1,0 +1,853 @@
+/**
+ * Stripe-Inspired Design System
+ * Based on ui_design.md specifications
+ */
+
+/* ============================================
+   CSS Custom Properties (Design Tokens)
+   ============================================ */
+
+:root {
+  /* Primary Colors */
+  --stripe-purple: #533afd;
+  --stripe-purple-hover: #4434d4;
+  --stripe-purple-deep: #2e2b8c;
+  --stripe-purple-light: #b9b9f9;
+  --stripe-purple-mid: #665efd;
+
+  /* Brand & Dark Colors */
+  --deep-navy: #061b31;
+  --brand-dark: #1c1e54;
+  --dark-navy: #0d253d;
+
+  /* Accent Colors */
+  --ruby: #ea2261;
+  --magenta: #f96bee;
+  --magenta-light: #ffd7ef;
+  --lemon: #9b6829;
+
+  /* Neutral Scale */
+  --color-heading: #061b31;
+  --color-label: #273951;
+  --color-body: #64748d;
+  --success-green: #15be53;
+  --success-text: #108c3d;
+
+  /* Surface & Borders */
+  --border-default: #e5edf5;
+  --border-purple: #b9b9f9;
+  --border-soft-purple: #d6d9fc;
+  --border-magenta: #ffd7ef;
+  --border-dashed: #362baa;
+
+  /* Shadow Colors */
+  --shadow-blue: rgba(50, 50, 93, 0.25);
+  --shadow-dark-blue: rgba(3, 3, 39, 0.25);
+  --shadow-black: rgba(0, 0, 0, 0.1);
+  --shadow-ambient: rgba(23, 23, 23, 0.08);
+  --shadow-soft: rgba(23, 23, 23, 0.06);
+  
+  /* Signature Stripe Shadow (for direct use) */
+  --shadow-stripe-standard: rgba(50, 50, 93, 0.25) 0px 30px 45px -30px, rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+  --shadow-stripe-hover: rgba(50, 50, 93, 0.25) 0px 35px 50px -25px, rgba(0, 0, 0, 0.1) 0px 20px 40px -15px;
+  --shadow-stripe-deep: rgba(3, 3, 39, 0.25) 0px 14px 21px -14px, rgba(0, 0, 0, 0.1) 0px 8px 17px -8px;
+
+  /* Typography */
+  --font-primary: 'sohne-var', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'SourceCodePro', 'SFMono-Regular', 'Consolas', monospace;
+
+  /* Spacing Scale */
+  --space-1: 1px;
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-11: 11px;
+  --space-12: 12px;
+  --space-14: 14px;
+  --space-16: 16px;
+  --space-18: 18px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+  --space-56: 56px;
+  --space-64: 64px;
+
+  /* Border Radius */
+  --radius-micro: 1px;
+  --radius-standard: 4px;
+  --radius-comfortable: 5px;
+  --radius-relaxed: 6px;
+  --radius-large: 8px;
+
+  /* Typography Sizes */
+  --text-display-hero: 56px;
+  --text-display-large: 48px;
+  --text-section-heading: 32px;
+  --text-sub-heading-lg: 26px;
+  --text-sub-heading: 22px;
+  --text-body-lg: 18px;
+  --text-body: 16px;
+  --text-button: 16px;
+  --text-button-sm: 14px;
+  --text-link: 14px;
+  --text-caption: 13px;
+  --text-caption-sm: 12px;
+  --text-micro: 10px;
+  --text-nano: 8px;
+
+  /* Font Weights */
+  --weight-light: 300;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+
+  /* Line Heights */
+  --lh-tight: 1.00;
+  --lh-tighter: 1.03;
+  --lh-normal: 1.40;
+  --lh-relaxed: 2.00;
+
+  /* Letter Spacing (for display sizes) */
+  --tracking-display-hero: -1.4px;
+  --tracking-display-large: -0.96px;
+  --tracking-section: -0.64px;
+  --tracking-sub-lg: -0.26px;
+  --tracking-sub: -0.22px;
+}
+
+/* ============================================
+   Global Reset & Base Styles
+   ============================================ */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-light);
+  line-height: var(--lh-normal);
+  color: var(--color-body);
+  background-color: #ffffff;
+  overflow-x: hidden;
+  font-feature-settings: "ss01" on;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* ============================================
+   Typography
+   ============================================ */
+
+/* Display Hero - 56px */
+.stripe-display-hero {
+  font-family: var(--font-primary);
+  font-size: var(--text-display-hero);
+  font-weight: var(--weight-light);
+  line-height: var(--lh-tighter);
+  letter-spacing: var(--tracking-display-hero);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+}
+
+/* Display Large - 48px */
+.stripe-display-large {
+  font-family: var(--font-primary);
+  font-size: var(--text-display-large);
+  font-weight: var(--weight-light);
+  line-height: 1.15;
+  letter-spacing: var(--tracking-display-large);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+}
+
+/* Section Heading - 32px */
+.stripe-section-heading {
+  font-family: var(--font-primary);
+  font-size: var(--text-section-heading);
+  font-weight: var(--weight-light);
+  line-height: 1.10;
+  letter-spacing: var(--tracking-section);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+}
+
+/* Sub-heading Large - 26px */
+.stripe-sub-heading-lg {
+  font-family: var(--font-primary);
+  font-size: var(--text-sub-heading-lg);
+  font-weight: var(--weight-light);
+  line-height: 1.12;
+  letter-spacing: var(--tracking-sub-lg);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+}
+
+/* Sub-heading - 22px */
+.stripe-sub-heading {
+  font-family: var(--font-primary);
+  font-size: var(--text-sub-heading);
+  font-weight: var(--weight-light);
+  line-height: 1.10;
+  letter-spacing: var(--tracking-sub);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+}
+
+/* Body Large - 18px */
+.stripe-body-lg {
+  font-family: var(--font-primary);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-regular);
+  line-height: var(--lh-normal);
+  color: var(--color-body);
+  font-feature-settings: "ss01" on;
+}
+
+/* Body - 16px */
+.stripe-body {
+  font-family: var(--font-primary);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--lh-normal);
+  color: var(--color-body);
+  font-feature-settings: "ss01" on;
+}
+
+/* Button - 16px */
+.stripe-button {
+  font-family: var(--font-primary);
+  font-size: var(--text-button);
+  font-weight: var(--weight-regular);
+  line-height: var(--lh-tight);
+  font-feature-settings: "ss01" on;
+}
+
+/* Button Small - 14px */
+.stripe-button-sm {
+  font-family: var(--font-primary);
+  font-size: var(--text-button-sm);
+  font-weight: var(--weight-regular);
+  line-height: var(--lh-tight);
+  font-feature-settings: "ss01" on;
+}
+
+/* Link - 14px */
+.stripe-link {
+  font-family: var(--font-primary);
+  font-size: var(--text-link);
+  font-weight: var(--weight-regular);
+  line-height: var(--lh-tight);
+  font-feature-settings: "ss01" on;
+}
+
+/* Caption - 13px */
+.stripe-caption {
+  font-family: var(--font-primary);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-regular);
+  font-feature-settings: "ss01" on;
+}
+
+/* Caption Small - 12px */
+.stripe-caption-sm {
+  font-family: var(--font-primary);
+  font-size: var(--text-caption-sm);
+  font-weight: var(--weight-light);
+  line-height: 1.33;
+  font-feature-settings: "ss01" on;
+}
+
+/* Caption Tabular - 12px (for numbers) */
+.stripe-caption-tabular {
+  font-family: var(--font-primary);
+  font-size: var(--text-caption-sm);
+  font-weight: var(--weight-light);
+  line-height: 1.33;
+  letter-spacing: -0.36px;
+  font-feature-settings: "tnum" on;
+}
+
+/* Micro - 10px */
+.stripe-micro {
+  font-family: var(--font-primary);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-light);
+  line-height: 1.15;
+  letter-spacing: 0.1px;
+  font-feature-settings: "ss01" on;
+}
+
+/* Micro Tabular - 10px (for numbers) */
+.stripe-micro-tabular {
+  font-family: var(--font-primary);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-light);
+  line-height: 1.15;
+  letter-spacing: -0.3px;
+  font-feature-settings: "tnum" on;
+}
+
+/* Nano - 8px */
+.stripe-nano {
+  font-family: var(--font-primary);
+  font-size: var(--text-nano);
+  font-weight: var(--weight-light);
+  line-height: 1.07;
+  font-feature-settings: "ss01" on;
+}
+
+/* Code Body - 12px */
+.stripe-code {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption-sm);
+  font-weight: var(--weight-medium);
+  line-height: var(--lh-relaxed);
+}
+
+/* Code Bold - 12px */
+.stripe-code-bold {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption-sm);
+  font-weight: var(--weight-bold);
+  line-height: var(--lh-relaxed);
+}
+
+/* Code Label - 12px */
+.stripe-code-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption-sm);
+  font-weight: var(--weight-medium);
+  line-height: var(--lh-relaxed);
+  text-transform: uppercase;
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+
+/* Primary Purple Button */
+.stripe-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  padding: var(--space-8) var(--space-16);
+  background-color: var(--stripe-purple);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-standard);
+  font-family: var(--font-primary);
+  font-size: var(--text-button);
+  font-weight: var(--weight-regular);
+  line-height: var(--lh-tight);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-feature-settings: "ss01" on;
+  text-decoration: none;
+}
+
+.stripe-btn-primary:hover {
+  background-color: var(--stripe-purple-hover);
+}
+
+.stripe-btn-primary:focus {
+  outline: 2px solid var(--stripe-purple);
+  outline-offset: 2px;
+}
+
+/* Ghost / Outlined Button */
+.stripe-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  padding: var(--space-8) var(--space-16);
+  background-color: transparent;
+  color: var(--stripe-purple);
+  border: 1px solid var(--border-purple);
+  border-radius: var(--radius-standard);
+  font-family: var(--font-primary);
+  font-size: var(--text-button);
+  font-weight: var(--weight-regular);
+  line-height: var(--lh-tight);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-feature-settings: "ss01" on;
+  text-decoration: none;
+}
+
+.stripe-btn-ghost:hover {
+  background-color: rgba(83, 58, 253, 0.05);
+}
+
+.stripe-btn-ghost:focus {
+  outline: 2px solid var(--stripe-purple);
+  outline-offset: 2px;
+}
+
+/* Transparent Info Button */
+.stripe-btn-info {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  padding: var(--space-8) var(--space-16);
+  background-color: transparent;
+  color: #2874ad;
+  border: 1px solid rgba(43, 145, 223, 0.2);
+  border-radius: var(--radius-standard);
+  font-family: var(--font-primary);
+  font-size: var(--text-button);
+  font-weight: var(--weight-regular);
+  line-height: var(--lh-tight);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-feature-settings: "ss01" on;
+  text-decoration: none;
+}
+
+.stripe-btn-info:hover {
+  background-color: rgba(43, 145, 223, 0.05);
+}
+
+/* Neutral Ghost Button */
+.stripe-btn-neutral {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  padding: var(--space-8) var(--space-16);
+  background-color: rgba(255, 255, 255, 0);
+  color: rgba(16, 16, 16, 0.3);
+  border: 1px solid rgb(212, 222, 233);
+  border-radius: var(--radius-standard);
+  font-family: var(--font-primary);
+  font-size: var(--text-button);
+  font-weight: var(--weight-regular);
+  line-height: var(--lh-tight);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-feature-settings: "ss01" on;
+  text-decoration: none;
+}
+
+.stripe-btn-neutral:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Small Button */
+.stripe-btn-sm {
+  padding: var(--space-6) var(--space-12);
+  font-size: var(--text-button-sm);
+}
+
+/* ============================================
+   Cards & Containers
+   ============================================ */
+
+.stripe-card {
+  background-color: #ffffff;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-comfortable);
+  box-shadow: 
+    rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
+    rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+  transition: box-shadow 0.3s ease;
+}
+
+.stripe-card:hover {
+  box-shadow: 
+    rgba(50, 50, 93, 0.25) 0px 35px 50px -25px,
+    rgba(0, 0, 0, 0.1) 0px 20px 40px -15px;
+}
+
+/* Card with tight radius */
+.stripe-card-tight {
+  border-radius: var(--radius-standard);
+}
+
+/* Card with large radius */
+.stripe-card-large {
+  border-radius: var(--radius-large);
+}
+
+/* Card with dark accent border */
+.stripe-card-dark-border {
+  border: 1px solid var(--deep-navy);
+}
+
+/* Ambient shadow (subtle elevation) */
+.stripe-shadow-ambient {
+  box-shadow: rgba(23, 23, 23, 0.08) 0px 15px 35px 0px;
+}
+
+/* Standard shadow */
+.stripe-shadow-standard {
+  box-shadow: 
+    rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
+    rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+}
+
+/* Deep shadow (modals, popovers) */
+.stripe-shadow-deep {
+  box-shadow: 
+    rgba(3, 3, 39, 0.25) 0px 14px 21px -14px,
+    rgba(0, 0, 0, 0.1) 0px 8px 17px -8px;
+}
+
+/* ============================================
+   Badges / Tags / Pills
+   ============================================ */
+
+/* Neutral Pill */
+.stripe-badge-neutral {
+  display: inline-flex;
+  align-items: center;
+  padding: 0px var(--space-6);
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #f6f9fc;
+  border-radius: var(--radius-standard);
+  font-family: var(--font-primary);
+  font-size: 11px;
+  font-weight: var(--weight-regular);
+  font-feature-settings: "ss01" on;
+}
+
+/* Success Badge */
+.stripe-badge-success {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px var(--space-6);
+  background-color: rgba(21, 190, 83, 0.2);
+  color: var(--success-text);
+  border: 1px solid rgba(21, 190, 83, 0.4);
+  border-radius: var(--radius-standard);
+  font-family: var(--font-primary);
+  font-size: 10px;
+  font-weight: var(--weight-light);
+  font-feature-settings: "ss01" on;
+}
+
+/* ============================================
+   Inputs & Forms
+   ============================================ */
+
+.stripe-input {
+  width: 100%;
+  padding: var(--space-10) var(--space-12);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-standard);
+  font-family: var(--font-primary);
+  font-size: var(--text-body);
+  font-weight: var(--weight-light);
+  color: var(--deep-navy);
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-input::placeholder {
+  color: var(--color-body);
+}
+
+.stripe-input:focus {
+  outline: none;
+  border-color: var(--stripe-purple);
+  box-shadow: 0 0 0 3px rgba(83, 58, 253, 0.1);
+}
+
+.stripe-input-label {
+  display: block;
+  margin-bottom: var(--space-6);
+  font-family: var(--font-primary);
+  font-size: var(--text-button-sm);
+  font-weight: var(--weight-light);
+  color: var(--color-label);
+  font-feature-settings: "ss01" on;
+}
+
+/* ============================================
+   Navigation
+   ============================================ */
+
+.stripe-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.stripe-nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--radius-relaxed);
+}
+
+.stripe-nav-link {
+  font-family: var(--font-primary);
+  font-size: var(--text-link);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-nav-link:hover {
+  color: var(--stripe-purple);
+}
+
+/* ============================================
+   Decorative Elements
+   ============================================ */
+
+/* Dashed Border - Purple */
+.stripe-dashed-purple {
+  border: 1px dashed var(--border-dashed);
+}
+
+/* Dashed Border - Magenta */
+.stripe-dashed-magenta {
+  border: 1px dashed var(--border-magenta);
+}
+
+/* Gradient Accent - Ruby to Magenta */
+.stripe-gradient-ruby-magenta {
+  background: linear-gradient(135deg, var(--ruby) 0%, var(--magenta) 100%);
+}
+
+/* Dark Brand Section */
+.stripe-section-dark {
+  background-color: var(--brand-dark);
+  color: #ffffff;
+}
+
+.stripe-section-dark .stripe-sub-heading {
+  color: #ffffff;
+}
+
+.stripe-section-dark .stripe-body {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ============================================
+   Layout & Spacing
+   ============================================ */
+
+.stripe-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 var(--space-16);
+}
+
+.stripe-section {
+  padding: var(--space-64) 0;
+}
+
+.stripe-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-24);
+}
+
+.stripe-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-24);
+}
+
+/* ============================================
+   Scrollbar Styling
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: var(--radius-standard);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-body);
+  border-radius: var(--radius-standard);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--deep-navy);
+}
+
+/* ============================================
+   Responsive Breakpoints
+   ============================================ */
+
+/* Mobile: <640px */
+@media (max-width: 639px) {
+  :root {
+    --text-display-hero: 32px;
+    --text-display-large: 32px;
+    --text-section-heading: 26px;
+  }
+
+  .stripe-grid-2,
+  .stripe-grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .stripe-section {
+    padding: var(--space-40) 0;
+  }
+}
+
+/* Tablet: 640-1024px */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .stripe-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop: 1024-1280px */
+@media (min-width: 1024px) {
+  .stripe-container {
+    padding: 0 var(--space-24);
+  }
+}
+
+/* Large Desktop: >1280px */
+@media (min-width: 1281px) {
+  .stripe-container {
+    padding: 0 var(--space-32);
+  }
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+
+/* Text Colors */
+.text-heading {
+  color: var(--deep-navy);
+}
+
+.text-body {
+  color: var(--color-body);
+}
+
+.text-label {
+  color: var(--color-label);
+}
+
+.text-purple {
+  color: var(--stripe-purple);
+}
+
+.text-success {
+  color: var(--success-green);
+}
+
+/* Background Colors */
+.bg-white {
+  background-color: #ffffff;
+}
+
+.bg-brand-dark {
+  background-color: var(--brand-dark);
+}
+
+/* Spacing Utilities */
+.mt-8 { margin-top: var(--space-8); }
+.mt-16 { margin-top: var(--space-16); }
+.mt-24 { margin-top: var(--space-24); }
+.mb-8 { margin-bottom: var(--space-8); }
+.mb-16 { margin-bottom: var(--space-16); }
+.mb-24 { margin-bottom: var(--space-24); }
+.p-16 { padding: var(--space-16); }
+.p-24 { padding: var(--space-24); }
+
+/* Flex Utilities */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-8 { gap: var(--space-8); }
+.gap-16 { gap: var(--space-16); }
+.gap-24 { gap: var(--space-24); }
+
+/* ============================================
+   Ant Design Override Classes (Optional)
+   ============================================ */
+
+/* If using Ant Design components, apply Stripe styling */
+.ant-btn.stripe-theme {
+  border-radius: var(--radius-standard);
+  font-family: var(--font-primary);
+  font-feature-settings: "ss01" on;
+}
+
+.ant-btn.stripe-theme.ant-btn-primary {
+  background-color: var(--stripe-purple);
+}
+
+.ant-btn.stripe-theme.ant-btn-primary:hover {
+  background-color: var(--stripe-purple-hover);
+}
+
+.ant-card.stripe-theme {
+  border-radius: var(--radius-comfortable);
+  border: 1px solid var(--border-default);
+  box-shadow:
+    var(--shadow-blue) 0px 30px 45px -30px,
+    var(--shadow-black) 0px 18px 36px -18px;
+}
+
+.ant-card.stripe-theme:hover {
+  box-shadow:
+    var(--shadow-blue) 0px 35px 50px -25px,
+    var(--shadow-black) 0px 20px 40px -15px;
+}
+
+.ant-input.stripe-theme {
+  border-radius: var(--radius-standard);
+  font-family: var(--font-primary);
+  font-feature-settings: "ss01" on;
+}
+
+.ant-input.stripe-theme:focus {
+  border-color: var(--stripe-purple);
+  box-shadow: 0 0 0 2px rgba(83, 58, 253, 0.1);
+}
+
+.ant-menu.stripe-theme {
+  font-family: var(--font-primary);
+  font-feature-settings: "ss01" on;
+}
+
+.ant-menu.stripe-theme .ant-menu-item {
+  font-weight: var(--weight-light);
+}

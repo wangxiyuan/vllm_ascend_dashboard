@@ -1,0 +1,30 @@
+请在 ModelBoardConfig.tsx 中找到字段说明部分（约 2397 行），替换为：
+
+```tsx
+<div style={{ marginTop: 16 }}>
+  <p style={{ fontWeight: 500, marginBottom: 8 }}>字段说明：</p>
+  <ul style={{ margin: 0, paddingLeft: 20, lineHeight: 1.8 }}>
+    <li><strong>model_name</strong>：模型名称（必填），如 <code>Qwen/Qwen3-8B</code></li>
+    <li><strong>hardware</strong>：硬件类型（必填），如 <code>A2</code>、<code>A3</code>、<code>310P</code></li>
+    <li><strong>vllm_version</strong>：vLLM 版本（建议填写），如 <code>v0.19.0</code></li>
+    <li><strong>vllm_ascend_version</strong>：vLLM Ascend 版本（建议填写），如 <code>0.5.0</code></li>
+    <li><strong>pass_fail</strong>：通过/失败状态（必填），<code>pass</code> 或 <code>fail</code></li>
+    <li><strong>tasks</strong>：任务列表（推荐格式），包含多个任务，每个任务有名称和指标列表</li>
+    <li><strong>metrics</strong>：性能指标，支持两种格式：
+      <ul style={{ margin: '4px 0', paddingLeft: 20 }}>
+        <li>配合 <code>tasks</code> 使用：系统会自动从 tasks 中提取</li>
+        <li>独立使用（简化格式）：扁平化的键值对，如 <code>gsm8k.exact_match: 0.89</code></li>
+      </ul>
+    </li>
+    <li><strong>test_config</strong>：测试配置（可选），描述测试时的参数配置</li>
+    <li><strong>known_issues</strong>：已知问题（可选），描述发现的问题</li>
+    <li><strong>notes</strong>：备注（可选），其他说明信息</li>
+  </ul>
+  <p style={{ marginTop: 12, color: '#1890ff' }}>
+    <strong>提示：</strong>系统支持三种报告格式：
+    <br />&nbsp;&nbsp;• <strong>Tasks 格式</strong>（推荐）：结构清晰，适合多个任务
+    <br />&nbsp;&nbsp;• <strong>扁平化格式</strong>（简化）：直接列出 metrics，适合快速上报
+    <br />&nbsp;&nbsp;• <strong>lm_eval 格式</strong>：兼容 lm_eval 工具的输出格式
+  </p>
+</div>
+```

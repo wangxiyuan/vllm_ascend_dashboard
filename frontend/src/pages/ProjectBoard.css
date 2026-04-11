@@ -1,0 +1,161 @@
+/**
+ * Project Board Page - Stripe Design System
+ */
+
+/* Project Page Container */
+.stripe-project-page {
+  padding: var(--space-24);
+  background-color: #ffffff;
+  min-height: 100vh;
+}
+
+/* Page Header */
+.stripe-page-header {
+  margin-bottom: var(--space-32);
+  padding-bottom: var(--space-24);
+  border-bottom: 1px solid var(--border-default);
+  text-align: left;
+}
+
+.stripe-page-title {
+  font-family: var(--font-primary);
+  font-size: var(--text-section-heading);
+  font-weight: var(--weight-light);
+  color: var(--deep-navy);
+  margin-bottom: var(--space-8) !important;
+  font-feature-settings: "ss01" on;
+  letter-spacing: var(--tracking-section);
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  justify-content: flex-start;
+}
+
+.stripe-page-icon {
+  color: var(--stripe-purple);
+  font-size: 28px;
+}
+
+.stripe-page-description {
+  font-family: var(--font-primary);
+  font-size: var(--text-body);
+  color: var(--color-body);
+  font-feature-settings: "ss01" on;
+}
+
+/* Tabs */
+.stripe-project-page .ant-tabs {
+  font-family: var(--font-primary);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-project-page .ant-tabs-tab {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-body);
+  color: var(--deep-navy);
+}
+
+.stripe-project-page .ant-tabs-tab-active {
+  color: var(--stripe-purple);
+}
+
+.stripe-project-page .ant-tabs-ink-bar {
+  background-color: var(--stripe-purple);
+}
+
+/* Cards */
+.stripe-project-page .ant-card {
+  background: #ffffff;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-comfortable);
+  box-shadow: 
+    rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
+    rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+  margin-bottom: var(--space-24);
+}
+
+.stripe-project-page .ant-card:hover {
+  box-shadow: 
+    rgba(50, 50, 93, 0.25) 0px 35px 50px -25px,
+    rgba(0, 0, 0, 0.1) 0px 20px 40px -15px;
+}
+
+.stripe-project-page .ant-card-head {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.stripe-project-page .ant-card-head-title {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-sub-heading);
+  letter-spacing: var(--tracking-sub);
+}
+
+/* Table */
+.stripe-project-page .ant-table {
+  font-family: var(--font-primary);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-project-page .ant-table-thead > tr > th {
+  background-color: #fafafa;
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.stripe-project-page .ant-table-tbody > tr > td {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  color: var(--deep-navy);
+  font-feature-settings: "ss01" on;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.stripe-project-page .ant-table-tbody > tr:hover {
+  background-color: rgba(83, 58, 253, 0.02);
+}
+
+/* Timeline */
+.stripe-project-page .ant-timeline-item-content {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  color: var(--color-body);
+  font-feature-settings: "ss01" on;
+}
+
+/* Descriptions */
+.stripe-project-page .ant-descriptions-item-label {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  color: var(--color-label);
+}
+
+.stripe-project-page .ant-descriptions-item-content {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  color: var(--color-body);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stripe-project-page {
+    padding: var(--space-16);
+  }
+
+  .stripe-page-title {
+    font-size: var(--text-section-heading);
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .stripe-container {
+    padding: 0 var(--space-8);
+  }
+}

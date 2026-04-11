@@ -1,0 +1,80 @@
+"""
+API 依赖注入
+"""
+from typing import Annotated
+
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.security import decode_token
+from app.db.base import get_db
+from app.models import User
+
+# HTTP Bearer 认证
+security = HTTPBearer()
+
+
+async def get_current_user(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+) -> User:
+    """获取当前登录用户"""
+    token = credentials.credentials
+    payload = decode_token(token)
+
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token 无效或已过期",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    username: str = payload.get("sub")
+    if username is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token 无效",
+        )
+
+    result = await db.execute(select(User).where(User.username == username))
+    user = result.scalar_one_or_none()
+    if user is None or not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="用户不存在或已被禁用",
+        )
+
+    return user
+
+
+async def get_current_active_admin_user(
+    current_user: Annotated[User, Depends(get_current_user)]
+) -> User:
+    """获取当前登录的管理员用户"""
+    if current_user.role not in ["admin", "super_admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="权限不足",
+        )
+    return current_user
+
+
+async def get_current_active_super_admin_user(
+    current_user: Annotated[User, Depends(get_current_user)]
+) -> User:
+    """获取当前登录的超级管理员用户"""
+    if current_user.role != "super_admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="权限不足",
+        )
+    return current_user
+
+
+# 类型别名
+CurrentUser = Annotated[User, Depends(get_current_user)]
+CurrentAdminUser = Annotated[User, Depends(get_current_active_admin_user)]
+CurrentSuperAdminUser = Annotated[User, Depends(get_current_active_super_admin_user)]
+DbSession = Annotated[AsyncSession, Depends(get_db)]

@@ -1,0 +1,388 @@
+/**
+ * Login Page - Stripe Design System
+ */
+
+/* Login Page Container */
+.stripe-login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--deep-navy);
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-24);
+}
+
+/* Background Decorative Elements */
+.stripe-login-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.stripe-login-gradient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+  animation: float 20s ease-in-out infinite;
+}
+
+.stripe-login-orb-1 {
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(135deg, var(--stripe-purple) 0%, var(--magenta) 100%);
+  top: -100px;
+  right: -100px;
+  animation-delay: 0s;
+}
+
+.stripe-login-orb-2 {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, var(--ruby) 0%, var(--magenta) 100%);
+  bottom: -50px;
+  left: -50px;
+  animation-delay: -10s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 30px) scale(0.9);
+  }
+}
+
+/* Login Container */
+.stripe-login-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Login Header */
+.stripe-login-header {
+  text-align: center;
+  margin-bottom: var(--space-40);
+}
+
+.stripe-login-logo {
+  margin-bottom: var(--space-24);
+  display: inline-block;
+}
+
+.stripe-login-logo-img {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(83, 58, 253, 0.3));
+  animation: logoFloat 6s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.stripe-login-title {
+  font-family: var(--font-primary) !important;
+  font-size: var(--text-sub-heading-lg) !important;
+  font-weight: var(--weight-regular) !important;
+  line-height: 1.12 !important;
+  letter-spacing: var(--tracking-sub-lg) !important;
+  color: #ffffff !important;
+  margin-bottom: var(--space-8) !important;
+  font-feature-settings: "ss01" on !important;
+}
+
+.stripe-login-subtitle {
+  font-family: var(--font-primary) !important;
+  font-size: var(--text-body) !important;
+  font-weight: var(--weight-regular) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  margin: 0 !important;
+  font-feature-settings: "ss01" on !important;
+}
+
+/* Login Card */
+.stripe-login-card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-large);
+  box-shadow: 
+    rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
+    rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+  padding: var(--space-32);
+  transition: all 0.3s ease;
+}
+
+.stripe-login-card:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    rgba(50, 50, 93, 0.25) 0px 35px 50px -25px,
+    rgba(0, 0, 0, 0.1) 0px 20px 40px -15px;
+}
+
+.stripe-login-card .ant-card-body {
+  padding: 0;
+}
+
+/* Form Items */
+.stripe-form-item {
+  margin-bottom: var(--space-20);
+}
+
+.stripe-form-item .ant-form-item-label {
+  padding-bottom: var(--space-8);
+}
+
+.stripe-form-item .ant-form-item-label > label {
+  font-family: var(--font-primary) !important;
+  font-size: var(--text-button-sm) !important;
+  font-weight: var(--weight-regular) !important;
+  color: #ffffff !important;
+  font-feature-settings: "ss01" on !important;
+}
+
+/* Input Styling */
+.stripe-input {
+  height: 48px !important;
+  padding: 0 var(--space-12) 0 var(--space-32) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: var(--radius-standard) !important;
+  font-family: var(--font-primary) !important;
+  font-size: var(--text-body) !important;
+  font-weight: var(--weight-regular) !important;
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  transition: all 0.2s ease !important;
+  font-feature-settings: "ss01" on !important;
+}
+
+.stripe-input input::placeholder {
+  color: rgba(255, 255, 255, 0.8) !important;
+  opacity: 1 !important;
+}
+
+.stripe-input input:-ms-input-placeholder {
+  color: rgba(255, 255, 255, 0.8) !important;
+  opacity: 1 !important;
+}
+
+.stripe-input input::-ms-input-placeholder {
+  color: rgba(255, 255, 255, 0.8) !important;
+  opacity: 1 !important;
+}
+
+/* Ant Design Input Placeholder Override */
+.stripe-input .ant-input::placeholder {
+  color: rgba(255, 255, 255, 0.8) !important;
+  opacity: 1 !important;
+}
+
+.stripe-input .ant-input:-ms-input-placeholder {
+  color: rgba(255, 255, 255, 0.8) !important;
+  opacity: 1 !important;
+}
+
+.stripe-input .ant-input::-ms-input-placeholder {
+  color: rgba(255, 255, 255, 0.8) !important;
+  opacity: 1 !important;
+}
+
+/* Global placeholder override for login page */
+.stripe-login-card .ant-input::placeholder {
+  color: rgba(255, 255, 255, 0.8) !important;
+  opacity: 1 !important;
+}
+
+.stripe-login-card .ant-input:-ms-input-placeholder {
+  color: rgba(255, 255, 255, 0.8) !important;
+  opacity: 1 !important;
+}
+
+.stripe-login-card .ant-input::-ms-input-placeholder {
+  color: rgba(255, 255, 255, 0.8) !important;
+  opacity: 1 !important;
+}
+
+.stripe-login-card .ant-input-password::placeholder {
+  color: rgba(255, 255, 255, 0.8) !important;
+  opacity: 1 !important;
+}
+
+.stripe-input:hover {
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.stripe-input:focus {
+  border-color: var(--stripe-purple) !important;
+  box-shadow: 0 0 0 3px rgba(83, 58, 253, 0.3) !important;
+  outline: none !important;
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.stripe-input-icon {
+  color: #ffffff !important;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.stripe-input:focus + .stripe-input-icon,
+.stripe-input:hover + .stripe-input-icon {
+  color: var(--stripe-purple);
+}
+
+/* Input Password */
+.stripe-input .ant-input-password-icon {
+  color: var(--color-body);
+  transition: all 0.2s ease;
+}
+
+.stripe-input .ant-input-password-icon:hover {
+  color: var(--stripe-purple);
+}
+
+/* Submit Button */
+.stripe-login-btn {
+  height: 48px;
+  font-size: var(--text-button);
+  font-weight: var(--weight-regular);
+  background-color: var(--stripe-purple);
+  border: none;
+  border-radius: var(--radius-standard);
+  transition: all 0.2s ease;
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-login-btn:hover {
+  background-color: var(--stripe-purple-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(83, 58, 253, 0.3);
+}
+
+.stripe-login-btn:active {
+  transform: translateY(0);
+}
+
+.stripe-login-btn[loading] {
+  opacity: 0.8;
+}
+
+/* Form Submit Item */
+.stripe-form-item-submit {
+  margin-top: var(--space-24);
+}
+
+/* Footer */
+.stripe-login-footer {
+  margin-top: var(--space-32);
+  text-align: center;
+}
+
+.stripe-login-footer-text {
+  font-family: var(--font-primary) !important;
+  font-size: var(--text-caption-sm) !important;
+  font-weight: var(--weight-regular) !important;
+  color: #061b31 !important;
+  margin: 0 !important;
+  font-feature-settings: "ss01" on !important;
+}
+
+.stripe-link {
+  color: var(--stripe-purple);
+  text-decoration: none;
+  font-weight: var(--weight-regular);
+  transition: all 0.2s ease;
+}
+
+.stripe-link:hover {
+  color: var(--stripe-purple-hover);
+  text-decoration: underline;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .stripe-login-page {
+    padding: var(--space-16);
+  }
+
+  .stripe-login-container {
+    max-width: 100%;
+  }
+
+  .stripe-login-header {
+    margin-bottom: var(--space-32);
+  }
+
+  .stripe-login-title {
+    font-size: var(--text-section-heading);
+  }
+
+  .stripe-login-card {
+    padding: var(--space-24);
+    border-radius: var(--radius-comfortable);
+  }
+
+  .stripe-login-orb-1 {
+    width: 250px;
+    height: 250px;
+    top: -50px;
+    right: -50px;
+  }
+
+  .stripe-login-orb-2 {
+    width: 200px;
+    height: 200px;
+    bottom: -30px;
+    left: -30px;
+  }
+}
+
+/* Ant Design Override */
+.stripe-login-card .ant-input-affix-wrapper {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-standard);
+}
+
+.stripe-login-card .ant-input-affix-wrapper:hover {
+  border-color: var(--border-purple);
+}
+
+.stripe-login-card .ant-input-affix-wrapper-focused {
+  border-color: var(--stripe-purple);
+  box-shadow: 0 0 0 3px rgba(83, 58, 253, 0.1);
+}
+
+.stripe-login-card .ant-input {
+  font-family: var(--font-primary);
+  font-feature-settings: "ss01" on;
+}
+
+.stripe-login-card .ant-btn-primary {
+  background-color: var(--stripe-purple);
+}
+
+.stripe-login-card .ant-btn-primary:hover {
+  background-color: var(--stripe-purple-hover);
+}
