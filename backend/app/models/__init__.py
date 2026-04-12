@@ -21,7 +21,7 @@ from sqlalchemy.types import JSON
 __all__ = [
     "Base", "User", "ModelConfig", "ModelReport", "CIResult", "CIJob",
     "WorkflowConfig", "PerformanceData", "JobOwner", "JobVisibility",
-    "ModelSyncConfig", "GitHubCache", "ProjectDashboardConfig",
+    "ModelSyncConfig", "ProjectDashboardConfig",
     # 每日总结相关模型
     "DailyPR", "DailyIssue", "DailyCommit", "DailySummary", "LLMProviderConfig"
 ]
@@ -237,25 +237,6 @@ class ModelSyncConfig(Base):
     last_sync_at = Column(TIMESTAMP)  # 上次同步时间
     created_at = Column(TIMESTAMP, default=lambda: datetime.now(UTC))
     updated_at = Column(TIMESTAMP, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
-
-
-class GitHubCache(Base):
-    """GitHub 数据缓存表"""
-    __tablename__ = "github_cache"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    owner = Column(String(100), nullable=False, index=True)  # GitHub 组织名
-    repo = Column(String(100), nullable=False, index=True)  # 仓库名
-    data_type = Column(String(50), nullable=False, index=True)  # 数据类型：activity, release
-    days = Column(Integer, default=1)  # 数据范围（天数）
-    cache_data = Column(JSON, nullable=False)  # 缓存的 JSON 数据
-    cached_at = Column(TIMESTAMP, default=lambda: datetime.now(UTC), index=True)  # 缓存时间
-    expires_at = Column(TIMESTAMP, nullable=False, index=True)  # 过期时间
-
-    # 唯一约束：owner + repo + data_type + days 组合唯一
-    __table_args__ = (
-        UniqueConstraint('owner', 'repo', 'data_type', 'days', name='uq_github_cache_owner_repo_type_days'),
-    )
 
 
 class ProjectDashboardConfig(Base):

@@ -12,7 +12,6 @@ from app.api.v1 import (
     auth,
     ci,
     daily_summary,
-    github_activity,
     job_owners,
     model_sync_configs,
     models,
@@ -182,7 +181,6 @@ def create_app() -> FastAPI:
     app.include_router(workflows.router, prefix="/api/v1/workflows", tags=["Workflow 配置"])
     app.include_router(job_owners.router, prefix="/api/v1/job-owners", tags=["Job 责任人"])
     app.include_router(system_config.router, prefix="/api/v1/system/config", tags=["系统配置"])
-    app.include_router(github_activity.router, prefix="/api/v1/github-activity", tags=["GitHub 动态"])
     app.include_router(project_dashboard.router, prefix="/api/v1/project-dashboard", tags=["项目看板"])
 
     @app.get("/health")

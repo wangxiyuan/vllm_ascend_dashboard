@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_active_admin_user, get_current_user, get_db
+from app.api.deps import get_current_active_super_admin_user, get_current_user, get_db
 from app.core.config import settings
 from app.models import User
 
@@ -21,11 +21,12 @@ router = APIRouter()
 
 @router.get("")
 async def get_system_config(
-    current_user: Annotated[User, Depends(get_current_active_admin_user)]
+    current_user: Annotated[User, Depends(get_current_active_super_admin_user)]
 ):
     """
     获取系统配置
 
+    需要超级管理员权限（super_admin）
     返回可公开的配置信息（敏感数据如 token 会脱敏显示）
     """
     # 只返回非敏感配置
@@ -55,8 +56,6 @@ async def get_system_config(
                 "runs_limit": settings.MODEL_SYNC_RUNS_LIMIT,
             },
             "data_retention_days": settings.DATA_RETENTION_DAYS,
-            "frontend_refresh_interval_minutes": settings.FRONTEND_REFRESH_INTERVAL_MINUTES,
-            "github_cache_ttl_minutes": settings.GITHUB_CACHE_TTL_MINUTES,
             "project_dashboard_cache_interval_minutes": settings.PROJECT_DASHBOARD_CACHE_INTERVAL_MINUTES,
             "github_cache_dir": settings.GITHUB_CACHE_DIR,
         },
@@ -71,11 +70,12 @@ async def get_system_config(
 async def update_app_config(
     log_level: str | None = Query(None),
     debug: bool | None = Query(None),
-    current_user: Annotated[User, Depends(get_current_active_admin_user)] = None
+    current_user: Annotated[User, Depends(get_current_active_super_admin_user)] = None
 ):
     """
     更新应用配置
 
+    需要超级管理员权限（super_admin）
     同时更新运行时配置和 .env 文件
     """
     from app.core.config_manager import update_env_config
@@ -120,13 +120,14 @@ async def update_app_config(
 @router.put("/github")
 async def update_github_config(
     github_token: str | None = Query(None),
-    current_user: Annotated[User, Depends(get_current_active_admin_user)] = None
+    current_user: Annotated[User, Depends(get_current_active_super_admin_user)] = None
 ):
     """
     更新 GitHub 配置
 
+    需要超级管理员权限（super_admin）
     同时更新运行时配置和 .env 文件
-    
+
     注意：GitHub 项目固定为 vllm-project/vllm-ascend，不可修改
     """
     from app.core.config_manager import update_env_config
@@ -174,15 +175,14 @@ async def update_sync_config(
     model_sync_days_back: int | None = Query(None),
     model_sync_runs_limit: int | None = Query(None),
     data_retention_days: int | None = Query(None),
-    frontend_refresh_interval_minutes: int | None = Query(None),
-    github_cache_ttl_minutes: int | None = Query(None),
     project_dashboard_cache_interval_minutes: int | None = Query(None),
     github_cache_dir: str | None = Query(None),
-    current_user: Annotated[User, Depends(get_current_active_admin_user)] = None
+    current_user: Annotated[User, Depends(get_current_active_super_admin_user)] = None
 ):
     """
     更新同步配置
 
+    需要超级管理员权限（super_admin）
     同时更新运行时配置和 .env 文件
     """
     from app.core.config_manager import update_env_config
@@ -241,26 +241,17 @@ async def update_sync_config(
                 detail="数据保留天数必须在 1-3650 天之间",
             )
 
-    if frontend_refresh_interval_minutes is not None:
-        if frontend_refresh_interval_minutes < 0 or frontend_refresh_interval_minutes > 60:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="前端刷新间隔必须在 0-60 分钟之间",
-            )
-
-    if github_cache_ttl_minutes is not None:
-        if github_cache_ttl_minutes < 1 or github_cache_ttl_minutes > 60:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="GitHub 缓存过期时间必须在 1-60 分钟之间",
-            )
-
     if project_dashboard_cache_interval_minutes is not None:
         if project_dashboard_cache_interval_minutes < 1 or project_dashboard_cache_interval_minutes > 1440:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Project Dashboard 缓存更新间隔必须在 1-1440 分钟之间",
             )
+
+    if github_cache_dir is not None:
+        settings.GITHUB_CACHE_DIR = github_cache_dir
+        env_updates['github_cache_dir'] = github_cache_dir
+        updates.append(f"GitHub 缓存目录：{github_cache_dir or '默认 (data/)'}")
 
     # 更新配置（运行时）
     if ci_sync_interval_minutes is not None:
@@ -306,16 +297,6 @@ async def update_sync_config(
         settings.DATA_RETENTION_DAYS = data_retention_days
         env_updates['data_retention_days'] = data_retention_days
         updates.append(f"数据保留天数：{data_retention_days}天")
-
-    if frontend_refresh_interval_minutes is not None:
-        settings.FRONTEND_REFRESH_INTERVAL_MINUTES = frontend_refresh_interval_minutes
-        env_updates['frontend_refresh_interval_minutes'] = frontend_refresh_interval_minutes
-        updates.append(f"前端刷新间隔：{frontend_refresh_interval_minutes}分钟")
-
-    if github_cache_ttl_minutes is not None:
-        settings.GITHUB_CACHE_TTL_MINUTES = github_cache_ttl_minutes
-        env_updates['github_cache_ttl_minutes'] = github_cache_ttl_minutes
-        updates.append(f"GitHub 缓存过期时间：{github_cache_ttl_minutes}分钟")
 
     if project_dashboard_cache_interval_minutes is not None:
         settings.PROJECT_DASHBOARD_CACHE_INTERVAL_MINUTES = project_dashboard_cache_interval_minutes
@@ -401,11 +382,12 @@ async def update_sync_config(
 
 @router.post("/sync/trigger")
 async def trigger_sync_config(
-    current_user: Annotated[User, Depends(get_current_active_admin_user)] = None
+    current_user: Annotated[User, Depends(get_current_active_super_admin_user)] = None
 ):
     """
     手动触发配置重载
-    
+
+    需要超级管理员权限（super_admin）
     从环境变量重新加载配置
     """
 
@@ -457,6 +439,10 @@ async def get_system_status(
     cache_job = scheduler.scheduler.get_job('project_dashboard_cache_update')
     cache_next_sync = cache_job.next_run_time if cache_job else None
 
+    # 获取项目动态同步任务状态
+    daily_summary_job = scheduler.scheduler.get_job('daily_summary_task')
+    daily_summary_next_sync = daily_summary_job.next_run_time if daily_summary_job else None
+
     # 获取所有启用的 workflow 中最新的 last_sync_at
     db = SessionLocal()
     try:
@@ -490,6 +476,13 @@ async def get_system_status(
                     "next_sync": cache_next_sync.isoformat() if cache_next_sync else None,
                     "interval_minutes": settings.PROJECT_DASHBOARD_CACHE_INTERVAL_MINUTES,
                 },
+                "daily_summary": {
+                    "name": "项目动态同步",
+                    "next_sync": daily_summary_next_sync.isoformat() if daily_summary_next_sync else None,
+                    "enabled": getattr(settings, 'DAILY_SUMMARY_ENABLED', True),
+                    "cron_hour": getattr(settings, 'DAILY_SUMMARY_CRON_HOUR', 8),
+                    "cron_minute": getattr(settings, 'DAILY_SUMMARY_CRON_MINUTE', 0),
+                },
             },
         },
         "database": {
@@ -507,11 +500,12 @@ async def get_system_status(
 
 @router.get("/git-cache/status")
 async def get_git_cache_status(
-    current_user: Annotated[User, Depends(get_current_active_admin_user)]
+    current_user: Annotated[User, Depends(get_current_active_super_admin_user)]
 ):
     """
     获取 Git 缓存状态
 
+    需要超级管理员权限（super_admin）
     返回最新 commit 信息，方便管理员判断是否需要手动同步
     支持多个仓库：vllm-ascend 和 vllm
     """
@@ -551,7 +545,7 @@ async def get_git_cache_status(
 
 @router.post("/git-cache/sync")
 async def sync_git_cache(
-    current_user: Annotated[User, Depends(get_current_active_admin_user)],
+    current_user: Annotated[User, Depends(get_current_active_super_admin_user)],
     repo_type: str = Query("all", description="仓库类型: ascend, vllm, all"),
 ):
     """
@@ -678,7 +672,7 @@ async def get_daily_summary_config(
 @router.put("/daily-summary")
 async def update_daily_summary_config(
     config: dict,
-    current_user: Annotated[User, Depends(get_current_active_admin_user)],
+    current_user: Annotated[User, Depends(get_current_active_super_admin_user)],
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -795,7 +789,7 @@ async def get_llm_providers(
 async def update_llm_provider(
     provider: str,
     config: dict,
-    current_user: Annotated[User, Depends(get_current_active_admin_user)],
+    current_user: Annotated[User, Depends(get_current_active_super_admin_user)],
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -954,7 +948,7 @@ async def get_system_prompt_config(
 @router.put("/system-prompt")
 async def update_system_prompt_config(
     config: dict,
-    current_user: Annotated[User, Depends(get_current_active_admin_user)],
+    current_user: Annotated[User, Depends(get_current_active_super_admin_user)],
     db: AsyncSession = Depends(get_db)
 ):
     """

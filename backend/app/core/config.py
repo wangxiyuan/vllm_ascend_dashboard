@@ -50,12 +50,6 @@ class Settings(BaseSettings):
     MODEL_SYNC_RUNS_LIMIT: int = 100  # 每个 workflow 最多获取最近 N 次 runs
     MODEL_SYNC_DAYS_BACK: int = 3  # 自动同步时采集最近 N 天的数据
 
-    # 前端刷新配置
-    FRONTEND_REFRESH_INTERVAL_MINUTES: int = 10  # 前端动态数据刷新间隔（分钟），默认 10 分钟（与 GitHub 缓存过期时间一致）
-
-    # GitHub 缓存配置
-    GITHUB_CACHE_TTL_MINUTES: int = 10  # GitHub API 数据缓存过期时间（分钟），默认 10 分钟
-
     # Project Dashboard 配置
     PROJECT_DASHBOARD_CACHE_INTERVAL_MINUTES: int = 60  # Project Dashboard Git 仓库缓存更新间隔（分钟），默认 60 分钟
     GITHUB_CACHE_DIR: str = ""  # GitHub 本地缓存目录，默认为根目录 data/repos/

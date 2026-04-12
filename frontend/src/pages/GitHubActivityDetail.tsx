@@ -41,8 +41,8 @@ function GitHubActivityDetail() {
   const queryClient = useQueryClient()
   const { data: currentUser } = useCurrentUser()
 
-  // 判断是否是管理员
-  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin'
+  // 判断是否是超级管理员
+  const isSuperAdmin = currentUser?.role === 'super_admin'
 
   // 默认显示前一天
   const [selectedDate, setSelectedDate] = useState<string>(dayjs().subtract(1, 'day').format('YYYY-MM-DD'))
@@ -355,8 +355,8 @@ function GitHubActivityDetail() {
               disabledDate={(current) => current && current > dayjs().endOf('day')}
             />
           </Space>
-          {/* 手动采集按钮：仅管理员可见 */}
-          {isAdmin && (
+          {/* 手动采集按钮：仅超级管理员可见 */}
+          {isSuperAdmin && (
             <Tooltip title={isRefresh ? '重新采集当前日期的 GitHub 数据（覆盖已有数据）' : '采集当前日期的 GitHub 数据'}>
               <Button
                 icon={<ThunderboltOutlined />}
@@ -469,7 +469,7 @@ function GitHubActivityDetail() {
                 </Space>
               ),
               children: (
-                <AISummaryTab project={project} date={selectedDate} isAdmin={isAdmin} />
+                <AISummaryTab project={project} date={selectedDate} isSuperAdmin={isSuperAdmin} />
               ),
             },
           ]}

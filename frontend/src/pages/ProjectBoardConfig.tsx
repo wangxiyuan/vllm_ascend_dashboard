@@ -158,7 +158,7 @@ function ProjectBoardConfig() {
   const [meetingCalendar, setMeetingCalendar] = useState<MeetingCalendar | null>(null)
   const [calendarLoading, setCalendarLoading] = useState(false)
 
-  const [activeTabKey, setActiveTabKey] = useState('cache')
+  const [activeTabKey, setActiveTabKey] = useState('model')
   const [cacheDirForm] = Form.useForm()
   const [isCacheDirModalOpen, setIsCacheDirModalOpen] = useState(false)
   const [githubCacheDir, setGithubCacheDir] = useState<string>('')
@@ -922,135 +922,53 @@ function ProjectBoardConfig() {
   }
 
   // Tab 内容
-  const cacheTabContent = (
-    <Card>
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-        <Descriptions column={2} bordered size="small">
-          <Descriptions.Item label="GitHub 缓存目录">
-            <Tag color="cyan">{githubCacheDir || '默认 (data/repos/)'}</Tag>
-          </Descriptions.Item>
-          <Descriptions.Item label="缓存更新间隔">
-            <Tag color="purple">{projectDashboardCacheInterval} 分钟</Tag>
-          </Descriptions.Item>
-        </Descriptions>
-        
-        {/* 多仓库缓存状态 */}
-        <Card title="仓库缓存状态" size="small">
-          {gitCacheStatusLoading ? (
-            <Spin size="small" />
-          ) : gitCacheStatus?.repositories ? (
-            <Row gutter={16}>
-              <Col span={12}>
-                <Card 
-                  type="inner" 
-                  title={
-                    <Space>
-                      <Tag color="blue">vLLM Ascend</Tag>
-                      {gitCacheStatus.repositories.ascend.is_cloned ? <Tag color="green">已克隆</Tag> : <Tag color="default">未克隆</Tag>}
-                    </Space>
-                  }
-                  size="small"
-                >
-                  {gitCacheStatus.repositories.ascend.latest_commit ? (
-                    <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                      <div>
-                        <Text strong>最新 Commit: </Text>
-                        <Tag color="blue" style={{ fontFamily: 'monospace', fontSize: '12px' }}>
-                          {gitCacheStatus.repositories.ascend.latest_commit.sha.substring(0, 7)}
-                        </Tag>
-                        <Text ellipsis style={{ maxWidth: 200 }}>{gitCacheStatus.repositories.ascend.latest_commit.subject}</Text>
-                      </div>
-                      <div>
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                          <ClockCircleOutlined /> {dayjs(gitCacheStatus.repositories.ascend.latest_commit.date).format('YYYY-MM-DD HH:mm')}
-                        </Text>
-                      </div>
-                    </Space>
-                  ) : (
-                    <Text type="warning">缓存未就绪</Text>
-                  )}
-                </Card>
-              </Col>
-              <Col span={12}>
-                <Card 
-                  type="inner" 
-                  title={
-                    <Space>
-                      <Tag color="purple">vLLM</Tag>
-                      {gitCacheStatus.repositories.vllm.is_cloned ? <Tag color="green">已克隆</Tag> : <Tag color="default">未克隆</Tag>}
-                    </Space>
-                  }
-                  size="small"
-                >
-                  {gitCacheStatus.repositories.vllm.latest_commit ? (
-                    <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                      <div>
-                        <Text strong>最新 Commit: </Text>
-                        <Tag color="purple" style={{ fontFamily: 'monospace', fontSize: '12px' }}>
-                          {gitCacheStatus.repositories.vllm.latest_commit.sha.substring(0, 7)}
-                        </Tag>
-                        <Text ellipsis style={{ maxWidth: 200 }}>{gitCacheStatus.repositories.vllm.latest_commit.subject}</Text>
-                      </div>
-                      <div>
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                          <ClockCircleOutlined /> {dayjs(gitCacheStatus.repositories.vllm.latest_commit.date).format('YYYY-MM-DD HH:mm')}
-                        </Text>
-                      </div>
-                    </Space>
-                  ) : (
-                    <Text type="warning">缓存未就绪</Text>
-                  )}
-                </Card>
-              </Col>
-            </Row>
-          ) : (
-            <Text type="warning">无法获取缓存状态</Text>
-          )}
-        </Card>
-        
-        <Space wrap>
-          <Button
-            type="primary"
-            icon={<SyncOutlined spin={isCacheUpdating} />}
-            onClick={handleUpdateCache}
-            loading={isCacheUpdating}
-          >
-            更新缓存
-          </Button>
-          <Button
-            icon={<SyncOutlined />}
-            onClick={() => handleSyncGitCache('all')}
-            loading={isCacheUpdating}
-          >
-            同步所有仓库
-          </Button>
-          <Button
-            icon={<SyncOutlined />}
-            onClick={handleFixCache}
-            loading={isCacheUpdating}
-          >
-            修复缓存
-          </Button>
-          <Button
-            danger
-            icon={<SyncOutlined />}
-            onClick={handleRebuildCache}
-            loading={isCacheUpdating}
-          >
-            重建缓存
-          </Button>
-          <Button
-            icon={<SettingOutlined />}
-            onClick={handleOpenCacheDir}
-          >
-            配置管理
-          </Button>
-        </Space>
-        <Text type="secondary">
-          <strong>提示：</strong>如果缓存更新失败或无法 pull，请先尝试点击"修复缓存"按钮。如果缓存缺少 git 历史或 tags，请点击"重建缓存"按钮。首次克隆可能需要 5-10 分钟。
+
+  const modelTabContent = (
+    <div>
+      <Card
+        title="模型支持矩阵"
+        extra={
+          <Space>
+            <Button
+              icon={<SettingOutlined />}
+              onClick={handleOpenFeatureManage}
+            >
+              管理特性列
+            </Button>
+            <Button
+              icon={<PlusOutlined />}
+              type="primary"
+              onClick={handleAddModelEntry}
+            >
+              添加模型
+            </Button>
+            <Button
+              icon={<SaveOutlined />}
+              onClick={handleSaveModelMatrix}
+              type={hasChanges ? 'primary' : 'default'}
+            >
+              保存所有更改 {hasChanges && <span style={{ marginLeft: 4 }}>●</span>}
+            </Button>
+          </Space>
+        }
+      >
+        <Text type="secondary" style={{ marginBottom: 12, display: 'block' }}>
+          提示：所有字段都支持直接编辑，点击特性列可快速切换状态。可点击"管理特性列"自定义特性
         </Text>
-      </Space>
-    </Card>
+        {modelEntries.length === 0 ? (
+          <Empty description="暂无模型配置，请点击右上角'添加模型'按钮开始配置" />
+        ) : (
+          <Table
+            columns={modelColumns}
+            dataSource={modelEntries}
+            rowKey="key"
+            pagination={{ pageSize: 15 }}
+            scroll={{ x: 1600 }}
+            size="small"
+          />
+        )}
+      </Card>
+    </div>
   )
 
   const meetingTabContent = (
@@ -1104,54 +1022,6 @@ function ProjectBoardConfig() {
     </Card>
   )
 
-  const modelTabContent = (
-    <div>
-      <Card
-        title="模型支持矩阵"
-        extra={
-          <Space>
-            <Button
-              icon={<SettingOutlined />}
-              onClick={handleOpenFeatureManage}
-            >
-              管理特性列
-            </Button>
-            <Button
-              icon={<PlusOutlined />}
-              type="primary"
-              onClick={handleAddModelEntry}
-            >
-              添加模型
-            </Button>
-            <Button
-              icon={<SaveOutlined />}
-              onClick={handleSaveModelMatrix}
-              type={hasChanges ? 'primary' : 'default'}
-            >
-              保存所有更改 {hasChanges && <span style={{ marginLeft: 4 }}>●</span>}
-            </Button>
-          </Space>
-        }
-      >
-        <Text type="secondary" style={{ marginBottom: 12, display: 'block' }}>
-          提示：所有字段都支持直接编辑，点击特性列可快速切换状态。可点击"管理特性列"自定义特性
-        </Text>
-        {modelEntries.length === 0 ? (
-          <Empty description="暂无模型配置，请点击右上角'添加模型'按钮开始配置" />
-        ) : (
-          <Table
-            columns={modelColumns}
-            dataSource={modelEntries}
-            rowKey="key"
-            pagination={{ pageSize: 15 }}
-            scroll={{ x: 1600 }}
-            size="small"
-          />
-        )}
-      </Card>
-    </div>
-  )
-
   const forceMergeTabContent = (
     <Card title="强行合入 PR 记录">
       {forceMergeRecordsLoading ? (
@@ -1197,14 +1067,14 @@ function ProjectBoardConfig() {
 
   const tabItems = [
     {
-      key: 'cache',
+      key: 'model',
       label: (
         <Space>
-          <SyncOutlined />
-          Git 缓存管理
+          <SettingOutlined />
+          模型支持矩阵
         </Space>
       ),
-      children: cacheTabContent,
+      children: modelTabContent,
     },
     {
       key: 'meeting',
@@ -1215,16 +1085,6 @@ function ProjectBoardConfig() {
         </Space>
       ),
       children: meetingTabContent,
-    },
-    {
-      key: 'model',
-      label: (
-        <Space>
-          <SettingOutlined />
-          模型支持矩阵
-        </Space>
-      ),
-      children: modelTabContent,
     },
     {
       key: 'forcemerge',

@@ -11,9 +11,9 @@ from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import Date, case, cast, func, select
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.api.deps import DbSession
+from app.api.deps import CurrentSuperAdminUser, DbSession
 from app.core.config import settings
-from app.models import CIJob, CIResult, JobOwner, WorkflowConfig
+from app.models import CIJob, CIResult, JobOwner, User, WorkflowConfig
 from app.schemas import (
     CIDailyReport,
     CIJobDetailResponse,
@@ -358,12 +358,15 @@ async def get_ci_trends(
 
 @router.post("/sync", response_model=CISyncResponse)
 async def trigger_sync(
+    current_user: CurrentSuperAdminUser,
     days_back: int = Query(default=7, ge=1, le=90, description="从多少天前开始采集"),
     max_runs_per_workflow: int = Query(default=100, ge=1, le=1000, description="每个 workflow 最多采集多少条记录"),
     force_full_refresh: bool = Query(default=False, description="是否强制全量覆盖刷新"),
 ):
     """
     手动触发数据同步（异步执行，立即返回）
+
+    需要超级管理员权限（super_admin）
 
     Args:
         days_back: 从多少天前开始采集（默认 7 天，最多 90 天）

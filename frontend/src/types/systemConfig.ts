@@ -22,10 +22,9 @@ export interface SystemConfig {
     model_sync_config: {
       sync_interval_minutes: number
       days_back: number
+      runs_limit: number
     }
     data_retention_days: number
-    frontend_refresh_interval_minutes: number
-    github_cache_ttl_minutes: number
     project_dashboard_cache_interval_minutes: number
     github_cache_dir: string
   }
@@ -56,6 +55,13 @@ export interface SystemStatus {
         next_sync: string | null
         interval_minutes: number
       }
+      daily_summary: {
+        name: string
+        next_sync: string | null
+        enabled: boolean
+        cron_hour: number
+        cron_minute: number
+      }
     }
   }
   database: {
@@ -77,9 +83,8 @@ export interface SyncConfigUpdate {
   ci_sync_force_full_refresh?: boolean
   model_sync_interval_minutes?: number
   model_sync_days_back?: number
+  model_sync_runs_limit?: number
   data_retention_days?: number
-  frontend_refresh_interval_minutes?: number
-  github_cache_ttl_minutes?: number
   project_dashboard_cache_interval_minutes?: number
   github_cache_dir?: string
 }

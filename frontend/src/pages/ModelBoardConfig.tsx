@@ -2011,69 +2011,6 @@ function ModelBoardConfig() {
               </div>
             ),
           },
-          {
-            key: 'sync',
-            label: (
-              <Space>
-                <SyncOutlined />
-                <span>模型同步配置</span>
-              </Space>
-            ),
-            children: (
-              <div>
-                {/* 同步配置 */}
-                <Card
-                  title="同步配置"
-                  size="small"
-                  style={{ marginBottom: 16 }}
-                  extra={
-                    <Button
-                      size="small"
-                      icon={<EditOutlined />}
-                      onClick={handleOpenGlobalSyncConfig}
-                    >
-                      编辑
-                    </Button>
-                  }
-                >
-                  <Descriptions column={{ xxl: 3, xl: 3, lg: 3, md: 3, sm: 2, xs: 1 }} bordered size="small">
-                    <Descriptions.Item label="同步间隔">
-                      <Tag color="orange">{globalSyncConfig?.sync_interval_minutes || 60} 分钟</Tag>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="同步天数范围">
-                      <Tag color="orange">{globalSyncConfig?.days_back || 3} 天</Tag>
-                    </Descriptions.Item>
-                  </Descriptions>
-                </Card>
-
-                {/* 操作栏 */}
-                <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => openSyncModal()}
-                  >
-                    创建同步配置
-                  </Button>
-                </div>
-
-                {/* 配置列表 */}
-                <Card>
-                  <Table
-                    columns={syncColumns}
-                    dataSource={configs}
-                    loading={configsLoading}
-                    rowKey="id"
-                    pagination={{
-                      pageSize: 20,
-                      showSizeChanger: false,
-                    }}
-                    scroll={{ x: 1200 }}
-                  />
-                </Card>
-              </div>
-            ),
-          },
         ]}
       />
 

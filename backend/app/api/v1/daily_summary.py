@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, get_current_active_admin_user, get_db
+from app.api.deps import get_current_user, get_current_active_super_admin_user, get_db
 from app.models import User
 from app.models.daily_summary import DailySummary
 from app.schemas.daily_summary import (
@@ -43,13 +43,13 @@ router = APIRouter(prefix="/daily-summary", tags=["每日总结"])
 @router.post("/generate", response_model=GenerateSummaryResponse)
 async def generate_daily_summary(
     request_data: GenerateSummaryRequest,
-    current_user: Annotated[User, Depends(get_current_active_admin_user)],
+    current_user: Annotated[User, Depends(get_current_active_super_admin_user)],
     db: AsyncSession = Depends(get_db)
 ):
     """
     手动触发生成每日总结
 
-    需要管理员权限（admin 或 super_admin）
+    需要超级管理员权限（super_admin）
     """
     try:
         # 解析日期
@@ -104,13 +104,13 @@ async def generate_daily_summary(
 @router.post("/fetch-data", response_model=FetchDataResponse)
 async def fetch_daily_data(
     request_data: FetchDataRequest,
-    current_user: Annotated[User, Depends(get_current_active_admin_user)],
+    current_user: Annotated[User, Depends(get_current_active_super_admin_user)],
     db: AsyncSession = Depends(get_db)
 ):
     """
     手动触发采集每日数据
 
-    需要管理员权限（admin 或 super_admin）
+    需要超级管理员权限（super_admin）
     """
     try:
         fetch_date = DateType.fromisoformat(request_data.date)
@@ -156,14 +156,14 @@ async def fetch_daily_data(
 @router.post("/refresh-status", response_model=FetchDataResponse)
 async def refresh_daily_status(
     request_data: FetchDataRequest,
-    current_user: Annotated[User, Depends(get_current_active_admin_user)],
+    current_user: Annotated[User, Depends(get_current_active_super_admin_user)],
     db: AsyncSession = Depends(get_db)
 ):
     """
     刷新指定日期已采集数据的 PR 和 Issue 状态
 
-    需要管理员权限（admin 或 super_admin）
-    
+    需要超级管理员权限（super_admin）
+
     仅更新已有 PR 和 Issue 的状态（如 open/closed/merged），不采集新数据
     """
     try:
@@ -262,14 +262,14 @@ async def list_daily_summaries(
 async def regenerate_daily_summary(
     project: str,
     date: str,
-    current_user: Annotated[User, Depends(get_current_active_admin_user)],
+    current_user: Annotated[User, Depends(get_current_active_super_admin_user)],
     llm_provider: Optional[str] = Query(None),
     db: AsyncSession = Depends(get_db)
 ):
     """
     重新生成指定日期的每日总结
 
-    需要管理员权限（admin 或 super_admin）
+    需要超级管理员权限（super_admin）
     """
     try:
         summary_date = DateType.fromisoformat(date)

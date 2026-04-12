@@ -33,6 +33,7 @@ import {
 } from '@ant-design/icons'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api'
+import { useCurrentUser } from '../hooks/useCurrentUser'
 import {
   useJobOwners,
   useCreateJobOwner,
@@ -147,6 +148,10 @@ interface JobConfigItem {
 function CIBoardConfig() {
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState('workflows')
+  const { data: currentUser } = useCurrentUser()
+
+  // 判断是否是超级管理员
+  const isSuperAdmin = currentUser?.role === 'super_admin'
 
   // Workflow 管理状态
   const [isWorkflowModalVisible, setIsWorkflowModalVisible] = useState(false)
@@ -791,76 +796,6 @@ function CIBoardConfig() {
                     }}
                     scroll={{ x: 1000 }}
                   />
-                </Card>
-              </div>
-            ),
-          },
-          {
-            key: 'sync',
-            label: (
-              <Space>
-                <ClockCircleOutlined />
-                <span>同步配置</span>
-              </Space>
-            ),
-            children: (
-              <div>
-                {/* 同步配置卡片 */}
-                <Card
-                  title="同步配置"
-                  loading={syncConfigLoading}
-                  extra={
-                    <Space>
-                      <Button
-                        size="small"
-                        icon={<ReloadOutlined />}
-                        onClick={handleOpenSyncModal}
-                      >
-                        手动同步
-                      </Button>
-                      <Button
-                        size="small"
-                        onClick={handleOpenSyncConfig}
-                      >
-                        编辑
-                      </Button>
-                    </Space>
-                  }
-                >
-                  <Descriptions column={2} bordered>
-                    <Descriptions.Item label="同步间隔">
-                      {syncConfig?.sync_config.ci_sync_config.sync_interval_minutes} 分钟
-                    </Descriptions.Item>
-                    <Descriptions.Item label="同步天数范围">
-                      {syncConfig?.sync_config.ci_sync_config.days_back} 天
-                    </Descriptions.Item>
-                    <Descriptions.Item label="每个 Workflow 最多采集">
-                      {syncConfig?.sync_config.ci_sync_config.max_runs_per_workflow} 条
-                    </Descriptions.Item>
-                    <Descriptions.Item label="刷新模式">
-                      {syncConfig?.sync_config.ci_sync_config.force_full_refresh ? '全量覆盖' : '增量刷新'}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="数据保留策略">
-                      {syncConfig?.sync_config.data_retention_days} 天
-                    </Descriptions.Item>
-                    <Descriptions.Item label="下次同步时间">
-                      {systemStatus?.scheduler?.tasks?.ci_sync?.next_sync
-                        ? formatTimezone(systemStatus.scheduler.tasks.ci_sync.next_sync, 'YYYY-MM-DD HH:mm:ss')
-                        : '未安排'}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="调度器状态">
-                      {systemStatus?.scheduler?.running ? (
-                        <Tag color="green">运行中</Tag>
-                      ) : (
-                        <Tag color="red">已停止</Tag>
-                      )}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="上次同步时间">
-                      {systemStatus?.scheduler?.last_sync
-                        ? formatTimezone(systemStatus.scheduler.last_sync, 'YYYY-MM-DD HH:mm:ss')
-                        : '暂无记录'}
-                    </Descriptions.Item>
-                  </Descriptions>
                 </Card>
               </div>
             ),

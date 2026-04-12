@@ -20,10 +20,10 @@ const { Text } = Typography
 interface AISummaryTabProps {
   project: string | undefined
   date: string
-  isAdmin?: boolean  // 是否为管理员
+  isSuperAdmin?: boolean  // 是否为超级管理员
 }
 
-export const AISummaryTab: React.FC<AISummaryTabProps> = ({ project, date, isAdmin = false }) => {
+export const AISummaryTab: React.FC<AISummaryTabProps> = ({ project, date, isSuperAdmin = false }) => {
   const { data, isLoading, error, refetch } = useDailySummary(project || '', date)
   const regenerateMutation = useRegenerateDailySummary()
 
@@ -116,10 +116,10 @@ ${data.summary_markdown}
     if (errorMsg?.includes('未找到') || errorMsg?.includes('404')) {
       return (
         <Empty
-          description={isAdmin ? "暂未生成 AI 总结，请点击'生成'按钮生成" : "暂未生成 AI 总结"}
+          description={isSuperAdmin ? "暂未生成 AI 总结，请点击'生成'按钮生成" : "暂未生成 AI 总结"}
           image={Empty.PRESENTED_IMAGE_SIMPLE}
         >
-          {isAdmin && (
+          {isSuperAdmin && (
             <Button type="primary" icon={<RobotOutlined />} onClick={handleRegenerate}>
               生成总结
             </Button>
@@ -146,10 +146,10 @@ ${data.summary_markdown}
   if (!data || data.status === 'not_generated' || !data.summary_markdown) {
     return (
       <Empty
-        description={isAdmin ? "暂未生成 AI 总结，请点击'生成'按钮生成" : "暂未生成 AI 总结"}
+        description={isSuperAdmin ? "暂未生成 AI 总结，请点击'生成'按钮生成" : "暂未生成 AI 总结"}
         image={Empty.PRESENTED_IMAGE_SIMPLE}
       >
-        {isAdmin && (
+        {isSuperAdmin && (
           <Button
             type="primary"
             icon={<RobotOutlined />}
@@ -180,7 +180,7 @@ ${data.summary_markdown}
           >
             导出
           </Button>
-          {isAdmin && (
+          {isSuperAdmin && (
             <Button
               size="small"
               icon={<ReloadOutlined />}

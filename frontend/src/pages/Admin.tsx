@@ -39,12 +39,19 @@ function Admin() {
   }
 
   // 构建 Tab 列表
-  const tabItems: any[] = [
-    {
+  const tabItems: any[] = []
+
+  // 只有超级管理员才能访问系统配置
+  if (hasSuperAdminRole) {
+    tabItems.push({
       key: 'config',
       label: '系统配置',
       children: <SystemConfig />,
-    },
+    })
+  }
+
+  // 管理员和超级管理员都可以访问其他配置页面
+  tabItems.push(
     {
       key: 'project-board',
       label: '项目看板配置',
@@ -60,7 +67,7 @@ function Admin() {
       label: '模型看板配置',
       children: <ModelBoardConfig />,
     },
-  ]
+  )
 
   // 只有超级管理员才能访问用户管理
   if (hasSuperAdminRole) {
