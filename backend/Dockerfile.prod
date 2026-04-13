@@ -9,17 +9,13 @@ WORKDIR /app
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-# Copy only pyproject.toml (no lockfile needed)
-COPY pyproject.toml ./
+# Copy pyproject.toml and README.md (required by hatchling)
+COPY pyproject.toml README.md ./
 
-# Create virtual environment and install dependencies
+# Create virtual environment and install dependencies from pyproject.toml
 RUN python -m venv /opt/venv && \
     /opt/venv/bin/pip install --upgrade pip && \
-    uv pip install --python /opt/venv/bin/python \
-        fastapi uvicorn[standard] sqlalchemy aiosqlite aiomysql \
-        pydantic pydantic-settings python-jose[cryptography] \
-        cryptography passlib[bcrypt] httpx apscheduler \
-        python-multipart alembic
+    uv pip install --python /opt/venv/bin/python .
 
 
 # Stage 2: Production
