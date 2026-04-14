@@ -8,62 +8,62 @@ from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import case, func, select
 
 from app.api.deps import DbSession
-from app.models import CIJob, JobOwner, JobVisibility, WorkflowConfig
+from app.models import CIJob, JobOwner, WorkflowConfig
 from app.schemas import (
     CIJobResponse,
     JobOwnerCreate,
     JobOwnerResponse,
     JobOwnerUpdate,
     JobStats,
-    JobVisibilityResponse,
 )
 
 router = APIRouter()
 
 
-@router.get("/visibility", response_model=list[JobVisibilityResponse])
-async def list_job_visibility(
+@router.get("/hidden", response_model=list[JobOwnerResponse])
+async def list_hidden_jobs(
     db: DbSession
 ):
-    """获取所有 Job 可见性配置"""
-    stmt = select(JobVisibility).order_by(JobVisibility.workflow_name, JobVisibility.job_name)
+    """获取所有隐藏的 Job（通过 JobOwner.is_hidden 字段）"""
+    stmt = select(JobOwner).where(JobOwner.is_hidden == True).order_by(JobOwner.workflow_name, JobOwner.job_name)
     result = await db.execute(stmt)
     return result.scalars().all()
 
 
-@router.post("/visibility/toggle", response_model=JobVisibilityResponse)
-async def toggle_job_visibility(
+@router.post("/toggle-hidden", response_model=JobOwnerResponse)
+async def toggle_job_hidden(
     workflow_name: str = Query(..., description="Workflow 名称"),
     job_name: str = Query(..., description="Job 名称"),
     is_hidden: bool = Query(..., description="是否隐藏"),
     db: DbSession = None  # type: ignore
 ):
-    """切换 Job 可见性状态（无需配置责任人）"""
+    """切换 Job 可见性状态（通过 JobOwner.is_hidden 字段）"""
     # 查找现有记录
-    stmt = select(JobVisibility).where(
-        JobVisibility.workflow_name == workflow_name,
-        JobVisibility.job_name == job_name
+    stmt = select(JobOwner).where(
+        JobOwner.workflow_name == workflow_name,
+        JobOwner.job_name == job_name
     )
     result = await db.execute(stmt)
-    visibility = result.scalar_one_or_none()
+    owner = result.scalar_one_or_none()
 
-    if visibility:
+    if owner:
         # 更新现有记录
-        visibility.is_hidden = is_hidden
+        owner.is_hidden = is_hidden
         await db.commit()
-        await db.refresh(visibility)
+        await db.refresh(owner)
     else:
-        # 创建新记录
-        visibility = JobVisibility(
+        # 创建新记录（用于隐藏无责任人的 job）
+        owner = JobOwner(
             workflow_name=workflow_name,
             job_name=job_name,
+            owner='_system_hidden',
             is_hidden=is_hidden
         )
-        db.add(visibility)
+        db.add(owner)
         await db.commit()
-        await db.refresh(visibility)
+        await db.refresh(owner)
 
-    return visibility
+    return owner
 
 
 @router.get("", response_model=list[JobOwnerResponse])

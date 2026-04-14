@@ -40,8 +40,7 @@ import {
   useUpdateJobOwner,
   useAvailableJobs,
   useToggleJobHidden,
-  useJobVisibilityList,
-  useToggleJobVisibility,
+  useHiddenJobsList,
 } from '../hooks/useJobOwners'
 import { formatTimezone, fromTimezoneNow } from '../utils/timezone'
 import { useSyncProgress } from '../hooks/useCI'
@@ -459,11 +458,10 @@ function CIBoardConfig() {
 
   const { data: jobOwners, isLoading: jobOwnersLoading } = useJobOwners()
   const { data: availableJobs } = useAvailableJobs()
-  const { data: jobVisibilityList } = useJobVisibilityList()
+  const { data: hiddenJobsList } = useHiddenJobsList()
   const createJobOwnerMutation = useCreateJobOwner()
   const updateJobOwnerMutation = useUpdateJobOwner()
   const toggleHiddenMutation = useToggleJobHidden()
-  const toggleVisibilityMutation = useToggleJobVisibility()
 
   // 构建所有 Job 列表（包含已配置和未配置的）
   const allJobs = useMemo(() => {
@@ -476,8 +474,8 @@ function CIBoardConfig() {
       ]) || []
     )
 
-    const visibilityMap = new Map(
-      jobVisibilityList?.map((v) => [
+    const hiddenMap = new Map(
+      hiddenJobsList?.map((v) => [
         `${v.workflow_name}-${v.job_name}`,
         v.is_hidden,
       ]) || []
@@ -494,11 +492,11 @@ function CIBoardConfig() {
         email: owner?.email,
         display_name: owner?.display_name,
         notes: owner?.notes,
-        is_hidden: visibilityMap.get(key) || false,
+        is_hidden: hiddenMap.get(key) || false,
         has_owner: !!owner,
       } as JobConfigItem
     })
-  }, [availableJobs, jobOwners, jobVisibilityList])
+  }, [availableJobs, jobOwners, hiddenJobsList])
 
   // 构建去重后的 workflow 列表（用于筛选）
   const workflowOptions = useMemo(() => {
@@ -617,15 +615,11 @@ function CIBoardConfig() {
   // 切换 Job 显示/隐藏状态
   const handleJobToggleHidden = (record: JobConfigItem) => {
     const newIsHidden = !record.is_hidden
-    if (record.owner_id) {
-      toggleHiddenMutation.mutate(record.owner_id)
-    } else {
-      toggleVisibilityMutation.mutate({
-        workflow_name: record.workflow_name,
-        job_name: record.job_name,
-        is_hidden: newIsHidden,
-      })
-    }
+    toggleHiddenMutation.mutate({
+      workflow_name: record.workflow_name,
+      job_name: record.job_name,
+      is_hidden: newIsHidden,
+    })
   }
 
   // 处理 Job 配置创建/更新

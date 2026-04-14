@@ -6,7 +6,7 @@
 
 使用方法:
     python scripts/upgrade_db.py              # 升级到最新版本
-    python scripts/upgrade_db.py --target 0.2.1  # 升级到指定版本
+    python scripts/upgrade_db.py --target 0.0.1  # 升级到指定版本
     python scripts/upgrade_db.py --status   # 查看当前版本
 """
 import argparse

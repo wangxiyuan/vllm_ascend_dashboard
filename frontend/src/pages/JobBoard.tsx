@@ -6,7 +6,7 @@ import {
   CloseCircleOutlined,
   ReloadOutlined,
 } from '@ant-design/icons'
-import { useJobStats, useJobVisibilityList } from '../hooks/useJobOwners'
+import { useJobStats, useHiddenJobsList } from '../hooks/useJobOwners'
 import { formatDuration, renderConclusionTag } from '../utils/ciRenderers'
 import { formatTimezone } from '../utils/timezone'
 import type { JobStats } from '../services/jobOwners'
@@ -27,11 +27,11 @@ function JobBoard() {
     workflow_name: workflowFilter.length > 0 ? workflowFilter[0] : undefined,
   })
 
-  const { data: jobVisibilityList } = useJobVisibilityList()
+  const { data: hiddenJobsList } = useHiddenJobsList()
 
   // 构建隐藏 job 的集合
   const hiddenJobs = new Set(
-    jobVisibilityList?.filter(v => v.is_hidden).map(v => `${v.workflow_name}-${v.job_name}`) || []
+    hiddenJobsList?.filter(v => v.is_hidden).map(v => `${v.workflow_name}-${v.job_name}`) || []
   )
 
   // 过滤掉已隐藏的 job

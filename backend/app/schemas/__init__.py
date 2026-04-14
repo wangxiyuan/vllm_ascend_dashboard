@@ -28,8 +28,6 @@ __all__ = [
     "PerformanceDataBase", "PerformanceDataCreate", "PerformanceDataResponse", "PerformanceComparison",
     # Job Owner
     "JobOwnerBase", "JobOwnerCreate", "JobOwnerUpdate", "JobOwnerResponse",
-    # Job Visibility
-    "JobVisibilityBase", "JobVisibilityCreate", "JobVisibilityUpdate", "JobVisibilityResponse",
     # Project Dashboard
     "ProjectDashboardConfigResponse", "ProjectDashboardConfigUpdate",
     "ReleaseInfo", "VllmVersionInfo", "ModelSupportMatrix", "ModelSupportEntry",
@@ -551,34 +549,6 @@ class JobOwnerUpdate(BaseModel):
 
 class JobOwnerResponse(JobOwnerBase):
     """Job 责任人响应 Schema"""
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    created_at: datetime
-    updated_at: datetime
-
-
-# ============ Job Visibility Schemas ============
-
-class JobVisibilityBase(BaseModel):
-    """Job 可见性基础 Schema"""
-    workflow_name: str = Field(..., description="Workflow 名称")
-    job_name: str = Field(..., description="Job 名称")
-    is_hidden: bool = Field(False, description="是否隐藏")
-
-
-class JobVisibilityCreate(JobVisibilityBase):
-    """创建 Job 可见性 Schema"""
-    pass
-
-
-class JobVisibilityUpdate(BaseModel):
-    """更新 Job 可见性 Schema"""
-    is_hidden: bool | None = None
-
-
-class JobVisibilityResponse(JobVisibilityBase):
-    """Job 可见性响应 Schema"""
     model_config = ConfigDict(from_attributes=True)
 
     id: int

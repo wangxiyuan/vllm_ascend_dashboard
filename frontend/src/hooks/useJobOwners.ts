@@ -89,6 +89,7 @@ export const useToggleJobHidden = () => {
     mutationFn: jobOwnersApi.toggleJobHidden,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['job-owners'] })
+      queryClient.invalidateQueries({ queryKey: ['hidden-jobs-list'] })
     },
   })
 }
@@ -108,25 +109,11 @@ export const useJobStats = (params?: {
 }
 
 /**
- * 获取所有 Job 可见性配置
+ * 获取所有隐藏的 Job 列表
  */
-export const useJobVisibilityList = () => {
+export const useHiddenJobsList = () => {
   return useQuery({
-    queryKey: ['job-visibility-list'],
-    queryFn: jobOwnersApi.getJobVisibilityList,
-  })
-}
-
-/**
- * 切换 Job 可见性状态
- */
-export const useToggleJobVisibility = () => {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: jobOwnersApi.toggleJobVisibility,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['job-visibility-list'] })
-    },
+    queryKey: ['hidden-jobs-list'],
+    queryFn: jobOwnersApi.getHiddenJobs,
   })
 }

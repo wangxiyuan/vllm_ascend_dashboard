@@ -29,7 +29,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-from sqlalchemy import text
+from sqlalchemy import text, select
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.security import hash_password
@@ -134,21 +134,20 @@ async def mark_version_applied(version: str, description: str = ""):
         await db.commit()
 
 
-# ============ 表创建逻辑（整合 v0.2.0 - v0.2.7 升级） ============
+# ============ 表创建逻辑（使用最新 schema） ============
 
 async def create_tables_with_latest_schema():
     """
     创建所有数据库表（使用最新 schema）
-    
-    整合的升级版本：
-    - v0.2.0: model_configs, model_reports, model_sync_configs 增强
-    - v0.2.1: official_doc_url 字段
-    - v0.2.2: workflow_configs.last_sync_at
-    - v0.2.3: github_cache 表
-    - v0.2.4: ci_results 增强 (run_number, event, branch, head_sha)
-    - v0.2.5: workflow_name 大小写修复
-    - v0.2.6: model_sync_configs 增强，model_reports 新字段
-    - v0.2.7: daily_summary 相关表，llm_provider_configs
+
+    包含所有功能：
+    - 基础表：users, model_configs, model_reports, ci_results, ci_jobs, workflow_configs
+    - 性能数据：performance_data
+    - Job 管理：job_owners
+    - 模型同步：model_sync_configs
+    - 项目看板：project_dashboard_config
+    - GitHub 缓存：github_cache
+    - 每日总结：daily_prs, daily_issues, daily_commits, daily_summaries, llm_provider_configs
     """
     print("Step 1: Creating database tables with latest schema...")
     
@@ -162,9 +161,9 @@ async def create_tables_with_latest_schema():
                 await conn.run_sync(Base.metadata.create_all)
             print("  ✅ Base tables created\n")
             
-            # 2. 检查并创建 github_cache 表 (v0.2.3)
+            # 2. 检查并创建 github_cache 表
             if not await check_table_exists("github_cache"):
-                print("  Creating github_cache table (v0.2.3)...")
+                print("  Creating github_cache table...")
                 create_sql = """
                     CREATE TABLE github_cache (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -217,7 +216,7 @@ async def create_tables_with_latest_schema():
             else:
                 print("  ✓ github_cache table already exists\n")
             
-            # 3. 创建每日总结相关表 (v0.2.7)
+            # 3. 创建每日总结相关表
             await _create_daily_summary_tables(db, is_mysql)
             
             # 4. 检查并修复现有表的字段缺失
@@ -234,8 +233,8 @@ async def create_tables_with_latest_schema():
 
 
 async def _create_daily_summary_tables(db, is_mysql: bool):
-    """创建每日总结相关表 (v0.2.7)"""
-    print("  Creating daily summary tables (v0.2.7)...")
+    """创建每日总结相关表"""
+    print("  Creating daily summary tables...")
     
     # daily_prs
     if not await check_table_exists("daily_prs"):
@@ -487,13 +486,12 @@ async def _create_daily_summary_tables(db, is_mysql: bool):
                     enabled BOOLEAN DEFAULT TRUE,
                     is_active BOOLEAN DEFAULT FALSE,
                     display_order INT DEFAULT 0,
-                    config_json JSON,
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                 )
             """
             await db.execute(text(create_sql))
-            
+
             # 初始化默认配置
             insert_sql = """
                 INSERT INTO llm_provider_configs
@@ -517,7 +515,6 @@ async def _create_daily_summary_tables(db, is_mysql: bool):
                     enabled BOOLEAN DEFAULT 1,
                     is_active BOOLEAN DEFAULT 0,
                     display_order INTEGER DEFAULT 0,
-                    config_json JSON,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
@@ -542,10 +539,10 @@ async def _create_daily_summary_tables(db, is_mysql: bool):
 
 
 async def _fix_existing_table_columns(db, is_mysql: bool):
-    """修复现有表的字段缺失（v0.2.0 - v0.2.6 升级逻辑）"""
+    """修复现有表的字段缺失（添加最新 schema 的列）"""
     print("  Checking for missing columns in existing tables...")
     
-    # model_configs 表字段 (v0.2.0, v0.2.1)
+    # model_configs 表字段
     if await check_table_exists("model_configs"):
         columns_to_add = [
             ("key_metrics_config", "TEXT"),
@@ -560,7 +557,7 @@ async def _fix_existing_table_columns(db, is_mysql: bool):
                 await db.execute(text(f"ALTER TABLE model_configs ADD COLUMN {col_name} {col_type}"))
                 print(f"      ✅ Added {col_name}")
     
-    # model_reports 表字段 (v0.2.0, v0.2.6)
+    # model_reports 表字段
     if await check_table_exists("model_reports"):
         columns_to_add = [
             ("report_markdown", "TEXT"),
@@ -584,7 +581,7 @@ async def _fix_existing_table_columns(db, is_mysql: bool):
                     await db.execute(text(f"ALTER TABLE model_reports ADD COLUMN {col_name}"))
                 print(f"      ✅ Added {col_name}")
         
-        # 删除废弃字段 (v0.2.6)
+        # 删除废弃字段
         columns_to_drop = ["known_issues", "github_artifact_url"]
         for col_name in columns_to_drop:
             if await check_column_exists("model_reports", col_name):
@@ -592,7 +589,7 @@ async def _fix_existing_table_columns(db, is_mysql: bool):
                 await db.execute(text(f"ALTER TABLE model_reports DROP COLUMN {col_name}"))
                 print(f"      ✅ Dropped {col_name}")
     
-    # model_sync_configs 表字段 (v0.2.6)
+    # model_sync_configs 表字段
     if await check_table_exists("model_sync_configs"):
         if not await check_column_exists("model_sync_configs", "branch"):
             print("    Adding branch to model_sync_configs...")
@@ -609,14 +606,14 @@ async def _fix_existing_table_columns(db, is_mysql: bool):
                 await db.execute(text(f"ALTER TABLE model_sync_configs DROP COLUMN {col_name}"))
                 print(f"      ✅ Dropped {col_name}")
     
-    # workflow_configs 表字段 (v0.2.2)
+    # workflow_configs 表字段
     if await check_table_exists("workflow_configs"):
         if not await check_column_exists("workflow_configs", "last_sync_at"):
             print("    Adding last_sync_at to workflow_configs...")
             await db.execute(text("ALTER TABLE workflow_configs ADD COLUMN last_sync_at TIMESTAMP"))
             print("      ✅ Added last_sync_at")
     
-    # ci_results 表字段 (v0.2.4)
+    # ci_results 表字段
     if await check_table_exists("ci_results"):
         columns_to_add = [
             ("run_number", "INTEGER"),
@@ -631,7 +628,7 @@ async def _fix_existing_table_columns(db, is_mysql: bool):
                 await db.execute(text(f"ALTER TABLE ci_results ADD COLUMN {col_name} {col_type}"))
                 print(f"      ✅ Added {col_name}")
     
-    # llm_provider_configs 表字段 (v0.2.7 增量升级)
+    # llm_provider_configs 表字段
     if await check_table_exists("llm_provider_configs"):
         if not await check_column_exists("llm_provider_configs", "api_key"):
             print("    Adding api_key to llm_provider_configs...")
@@ -732,11 +729,31 @@ async def run_upgrades():
     # 因为表结构已经是最新的了
     if current_version == "0.0.0":
         logger.info("New database, marking as latest version")
-        await mark_version_applied("0.2.7", "Initial database creation with v0.2.7 schema")
-        print("  ✅ New database initialized with latest schema (v0.2.7)\n")
+        await mark_version_applied("0.0.1", "Initial database creation with latest schema")
+        print("  ✅ New database initialized with latest schema (v0.0.1)\n")
         return
     
-    # 对于已有数据库，仍然执行升级脚本
+    # 对于已有数据库（v0.2.0 - v0.2.7），执行 v0.0.1 升级脚本
+    # 这会合并 JobVisibility 表并删除 config_json 列
+    if current_version.startswith("0.2."):
+        print(f"  Upgrading from v{current_version} to v0.0.1...")
+        
+        # 导入并执行 v0.0.1 升级脚本
+        import importlib
+        try:
+            upgrade_v001 = importlib.import_module('scripts.upgrade_v0.0.1')
+            await upgrade_v001.upgrade()
+            
+            # 标记升级完成（如果升级脚本没有标记）
+            await mark_version_applied("0.0.1", "Merged JobVisibility and removed config_json")
+            print(f"  ✅ Successfully upgraded from v{current_version} to v0.0.1\n")
+        except ImportError as e:
+            logger.error(f"Failed to import upgrade script: {e}")
+            print(f"  ❌ Failed to import upgrade script: {e}\n")
+            raise
+        return
+    
+    # 对于其他版本，使用通用的升级机制
     print("  Existing database detected, running upgrade scripts...")
     
     # 导入升级模块

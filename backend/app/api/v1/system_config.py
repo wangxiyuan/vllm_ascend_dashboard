@@ -785,7 +785,6 @@ async def get_llm_providers(
                 "api_key_configured": bool(p.api_key),
                 "api_key_preview": p.api_key[:8] + "..." + p.api_key[-4:] if p.api_key and len(p.api_key) >= 12 else None,
                 "api_base_url": p.api_base_url,
-                "config_json": p.config_json,
             }
             for p in providers
         ]
@@ -816,7 +815,6 @@ async def update_llm_provider(
     - display_name: 显示名称
     - api_key: API Key
     - api_base_url: API 基础 URL
-    - config_json: 其他配置（temperature, max_tokens 等）
     """
     from app.models.daily_summary import LLMProviderConfig
 
@@ -858,9 +856,6 @@ async def update_llm_provider(
 
         if 'api_base_url' in config:
             provider_config.api_base_url = config['api_base_url']
-
-        if 'config_json' in config:
-            provider_config.config_json = config['config_json']
 
         await db.commit()
 

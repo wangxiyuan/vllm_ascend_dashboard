@@ -20,7 +20,7 @@ from sqlalchemy.types import JSON
 # 导出所有模型类，方便其他地方导入
 __all__ = [
     "Base", "User", "ModelConfig", "ModelReport", "CIResult", "CIJob",
-    "WorkflowConfig", "PerformanceData", "JobOwner", "JobVisibility",
+    "WorkflowConfig", "PerformanceData", "JobOwner",
     "ModelSyncConfig", "ProjectDashboardConfig",
     # 每日总结相关模型
     "DailyPR", "DailyIssue", "DailyCommit", "DailySummary", "LLMProviderConfig"
@@ -202,23 +202,6 @@ class JobOwner(Base):
     # 唯一约束：workflow_name + job_name 组合唯一
     __table_args__ = (
         UniqueConstraint('workflow_name', 'job_name', name='uq_job_owner_workflow_job'),
-    )
-
-
-class JobVisibility(Base):
-    """Job 可见性配置表（用于隐藏未配置责任人的 job）"""
-    __tablename__ = "job_visibility"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    workflow_name = Column(String(100), nullable=False, index=True)  # workflow 名称
-    job_name = Column(String(500), nullable=False, index=True)  # job 名称
-    is_hidden = Column(Boolean, default=False, index=True)  # 是否隐藏
-    created_at = Column(TIMESTAMP, default=lambda: datetime.now(UTC))
-    updated_at = Column(TIMESTAMP, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
-
-    # 唯一约束：workflow_name + job_name 组合唯一
-    __table_args__ = (
-        UniqueConstraint('workflow_name', 'job_name', name='uq_job_visibility_workflow_job'),
     )
 
 

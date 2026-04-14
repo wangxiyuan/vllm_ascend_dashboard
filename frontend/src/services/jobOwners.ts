@@ -15,15 +15,6 @@ export interface JobOwner {
   updated_at: string
 }
 
-export interface JobVisibility {
-  id: number
-  workflow_name: string
-  job_name: string
-  is_hidden: boolean
-  created_at: string
-  updated_at: string
-}
-
 export interface JobOwnerCreate {
   workflow_name: string
   job_name: string
@@ -31,6 +22,7 @@ export interface JobOwnerCreate {
   display_name?: string
   email?: string
   notes?: string
+  is_hidden?: boolean
 }
 
 export interface JobOwnerUpdate {
@@ -38,6 +30,7 @@ export interface JobOwnerUpdate {
   email?: string
   notes?: string
   display_name?: string
+  is_hidden?: boolean
 }
 
 export interface JobStats {
@@ -116,14 +109,6 @@ export const deleteJobOwner = async (ownerId: number): Promise<{ message: string
 }
 
 /**
- * 切换 Job 隐藏/显示状态
- */
-export const toggleJobHidden = async (ownerId: number): Promise<{ message: string; is_hidden: boolean }> => {
-  const response = await api.post<{ message: string; is_hidden: boolean }>(`/job-owners/${ownerId}/toggle-hidden`)
-  return response.data
-}
-
-/**
  * 获取 Job 汇总统计数据
  */
 export const getJobStats = async (params?: {
@@ -131,7 +116,7 @@ export const getJobStats = async (params?: {
   workflow_name?: string
   job_name?: string
 }): Promise<JobStats[]> => {
-  const response = await api.get<JobStats[]>('/job-owners/stats/job-summary', { 
+  const response = await api.get<JobStats[]>('/job-owners/stats/job-summary', {
     params: {
       ...params,
       days: params?.days === 'all' ? undefined : params?.days,
@@ -141,21 +126,21 @@ export const getJobStats = async (params?: {
 }
 
 /**
- * 获取所有 Job 可见性配置
+ * 获取所有隐藏的 Job 列表
  */
-export const getJobVisibilityList = async (): Promise<JobVisibility[]> => {
-  const response = await api.get<JobVisibility[]>('/job-owners/visibility')
+export const getHiddenJobs = async (): Promise<JobOwner[]> => {
+  const response = await api.get<JobOwner[]>('/job-owners/hidden')
   return response.data
 }
 
 /**
- * 切换 Job 可见性状态
+ * 切换 Job 可见性状态（通过 JobOwner.is_hidden 字段）
  */
-export const toggleJobVisibility = async (params: {
+export const toggleJobHidden = async (params: {
   workflow_name: string
   job_name: string
   is_hidden: boolean
-}): Promise<JobVisibility> => {
-  const response = await api.post<JobVisibility>('/job-owners/visibility/toggle', null, { params })
+}): Promise<JobOwner> => {
+  const response = await api.post<JobOwner>('/job-owners/toggle-hidden', null, { params })
   return response.data
 }

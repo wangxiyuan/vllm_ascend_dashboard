@@ -18,7 +18,7 @@ import {
   EyeOutlined,
   EyeInvisibleOutlined,
 } from '@ant-design/icons'
-import { useJobOwners, useCreateJobOwner, useUpdateJobOwner, useAvailableJobs, useToggleJobHidden, useJobVisibilityList, useToggleJobVisibility } from '../hooks/useJobOwners'
+import { useJobOwners, useCreateJobOwner, useUpdateJobOwner, useAvailableJobs, useToggleJobHidden, useHiddenJobsList } from '../hooks/useJobOwners'
 
 const { TextArea } = Input
 const { Text } = Typography
@@ -44,11 +44,10 @@ function JobConfig() {
 
   const { data: jobOwners, isLoading, refetch } = useJobOwners()
   const { data: availableJobs } = useAvailableJobs()
-  const { data: jobVisibilityList } = useJobVisibilityList()
+  const { data: hiddenJobsList } = useHiddenJobsList()
   const createMutation = useCreateJobOwner()
   const updateMutation = useUpdateJobOwner()
   const toggleHiddenMutation = useToggleJobHidden()
-  const toggleVisibilityMutation = useToggleJobVisibility()
 
   // 将 available jobs 转换为 Cascader 选项格式
   const jobOptions = availableJobs?.reduce((acc: Array<{ value: string; label: string; children: Array<{ value: string; label: string }> }>, item: { workflow_name: string; job_name: string }) => {
@@ -81,9 +80,9 @@ function JobConfig() {
     ).values()
   )
 
-  // 构建 job visibility 映射
-  const visibilityMap = new Map(
-    jobVisibilityList?.map((v) => [`${v.workflow_name}-${v.job_name}`, v.is_hidden]) || []
+  // 构建 hidden jobs 映射
+  const hiddenMap = new Map(
+    hiddenJobsList?.map((v) => [`${v.workflow_name}-${v.job_name}`, v.is_hidden]) || []
   )
 
   // 构建完整的 job 配置列表（包含已配置和未配置的）
@@ -91,8 +90,8 @@ function JobConfig() {
     const owner = jobOwners?.find(
       (jo) => jo.workflow_name === job.workflow_name && jo.job_name === job.job_name
     )
-    // 优先使用 job_owner 的 is_hidden，如果没有配置责任人则使用 job_visibility 的 is_hidden
-    const isHidden = owner?.is_hidden ?? visibilityMap.get(`${job.workflow_name}-${job.job_name}`) ?? false
+    // 使用 job_owner 的 is_hidden
+    const isHidden = owner?.is_hidden ?? hiddenMap.get(`${job.workflow_name}-${job.job_name}`) ?? false
 
     return {
       workflow_name: job.workflow_name,
@@ -207,15 +206,19 @@ function JobConfig() {
     if (record.has_owner && record.owner_id) {
       // 已配置责任人的，使用 job_owner 的 toggle-hidden API
       try {
-        await toggleHiddenMutation.mutateAsync(record.owner_id)
+        await toggleHiddenMutation.mutateAsync({
+          workflow_name: record.workflow_name,
+          job_name: record.job_name,
+          is_hidden: newIsHidden,
+        })
         message.success('状态已更新')
       } catch (error: any) {
         message.error(error.response?.data?.detail || '操作失败')
       }
     } else {
-      // 未配置责任人的，使用 job_visibility
+      // 未配置责任人的，创建新的 JobOwner 记录并设置 is_hidden
       try {
-        await toggleVisibilityMutation.mutateAsync({
+        await toggleHiddenMutation.mutateAsync({
           workflow_name: record.workflow_name,
           job_name: record.job_name,
           is_hidden: newIsHidden,

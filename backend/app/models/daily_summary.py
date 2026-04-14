@@ -125,6 +125,5 @@ class LLMProviderConfig(Base):
     enabled = Column(Boolean, default=True)
     is_active = Column(Boolean, default=False)  # 是否为当前激活的提供商（用于 AI 总结）
     display_order = Column(Integer, default=0)
-    config_json = Column(JSON)
     created_at = Column(TIMESTAMP, default=lambda: datetime.now(UTC))
     updated_at = Column(TIMESTAMP, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))

@@ -47,7 +47,6 @@ export interface LLMProvider {
   api_key_configured: boolean
   api_key_preview?: string  // API Key 预览（前 8 位 + ... + 后 4 位）
   api_base_url?: string
-  config_json?: Record<string, any>
 }
 
 export interface SystemPromptConfig {
