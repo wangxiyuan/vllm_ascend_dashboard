@@ -168,7 +168,31 @@ async def upgrade():
                 print("  ✓ config_json column does not exist in llm_provider_configs")
             
             await db.commit()
+
+            # ============================================
+            # Step 5: Record version in database_versions
+            # ============================================
+            print("Step 5: Recording version in database_versions...")
             
+            # Check if v0.0.1 already exists
+            result = await db.execute(text(
+                "SELECT COUNT(*) FROM database_versions WHERE version = '0.0.1'"
+            ))
+            count = result.scalar()
+            
+            if count == 0:
+                await db.execute(text(
+                    """INSERT INTO database_versions (version, description, applied_at) 
+                       VALUES ('0.0.1', :description, :applied_at)"""
+                ), {
+                    "description": "Merge JobVisibility into JobOwner and remove unused config_json column",
+                    "applied_at": datetime.now()
+                })
+                await db.commit()
+                print("  ✅ Version v0.0.1 recorded in database_versions")
+            else:
+                print("  ✓ Version v0.0.1 already exists in database_versions")
+
             print("\n" + "="*60)
             print("  ✅ Upgrade to v0.0.1 completed successfully!")
             print("="*60 + "\n")

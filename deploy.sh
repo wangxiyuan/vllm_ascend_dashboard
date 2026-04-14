@@ -208,7 +208,7 @@ deploy() {
 
     # Run database initialization
     log_step "Running database initialization..."
-    docker exec "$BACKEND_CONTAINER" python scripts/init_db.py || {
+    docker exec -w /app -e PYTHONPATH=/app "$BACKEND_CONTAINER" python scripts/init_db.py || {
         log_warn "Database initialization skipped (may already be initialized)"
     }
 
@@ -237,10 +237,11 @@ migrate_database() {
         return 1
     fi
 
-    # Run migration script (upgrades to v0.0.1)
-    log_info "Executing database upgrade to v0.0.1..."
-    if docker exec "$BACKEND_CONTAINER" python scripts/upgrade_v0.0.1.py; then
-        log_success "Database upgrade to v0.0.1 completed successfully!"
+    # Run migration script (automatically upgrades to latest version)
+    log_info "Executing database upgrade to latest version..."
+    # Set PYTHONPATH to include /app directory so 'app' module can be imported
+    if docker exec -w /app -e PYTHONPATH=/app "$BACKEND_CONTAINER" python scripts/upgrade_db.py; then
+        log_success "Database upgrade completed successfully!"
         return 0
     else
         log_error "Database upgrade failed!"
@@ -466,24 +467,20 @@ show_help() {
     echo ""
     echo "========================================"
     echo ""
-    echo "Version History:"
-    echo "  v0.0.1 - Current version"
-    echo "    - Merged JobVisibility into JobOwner"
-    echo "    - Removed unused config_json column"
+    echo "Automatic Upgrade:"
+    echo "  The 'upgrade' and 'migrate' commands will automatically:"
+    echo "  1. Detect current database version"
+    echo "  2. Find all available upgrade scripts (upgrade_v*.py)"
+    echo "  3. Apply upgrades in version order"
+    echo "  4. Record each version in database_versions table"
     echo ""
-    echo "  Upgrade from v0.2.x:"
-    echo "    The upgrade script will automatically:"
-    echo "    1. Merge job_visibility table into job_owners"
-    echo "    2. Remove config_json from llm_provider_configs"
+    echo "  Example upgrade path:"
+    echo "    v0.0.0 → v0.0.1 → v0.0.2 → ..."
     echo ""
-    echo "  Option 1: Automatic upgrade (recommended)"
-    echo "    $0 upgrade"
-    echo ""
-    echo "  Option 2: Manual upgrade"
-    echo "    1. $0 backup"
-    echo "    2. $0 stop"
-    echo "    3. $0 start"
-    echo "    4. $0 migrate"
+    echo "  Creating new upgrades:"
+    echo "  1. Create backend/scripts/upgrade_vX.Y.Z.py"
+    echo "  2. Define async upgrade() function"
+    echo "  3. Run '$0 upgrade' to apply"
     echo ""
     echo "========================================"
     echo ""
