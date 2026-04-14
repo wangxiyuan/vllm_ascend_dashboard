@@ -262,7 +262,7 @@ async def update_sync_config(
         # 重新配置调度器
         try:
             scheduler = get_scheduler()
-            scheduler.scheduler.remove_job('ci_data_sync')
+            # 使用 add_job 并设置 replace_existing=True，无需先 remove_job
             scheduler.scheduler.add_job(
                 scheduler._sync_ci_data_job,
                 trigger='interval',
@@ -306,7 +306,7 @@ async def update_sync_config(
         # 重新配置调度器
         try:
             scheduler = get_scheduler()
-            scheduler.scheduler.remove_job('project_dashboard_cache_update')
+            # 使用 add_job 并设置 replace_existing=True，无需先 remove_job
             scheduler.scheduler.add_job(
                 scheduler._update_project_dashboard_cache_job,
                 trigger='interval',
@@ -331,7 +331,7 @@ async def update_sync_config(
         # 重新配置调度器
         try:
             scheduler = get_scheduler()
-            scheduler.scheduler.remove_job('model_report_sync')
+            # 使用 add_job 并设置 replace_existing=True，无需先 remove_job
             scheduler.scheduler.add_job(
                 scheduler._sync_model_reports_job,
                 trigger='interval',
@@ -444,16 +444,14 @@ async def get_system_status(
     daily_summary_next_sync = daily_summary_job.next_run_time if daily_summary_job else None
 
     # 获取所有启用的 workflow 中最新的 last_sync_at
-    db = SessionLocal()
-    try:
-        stmt = select(func.max(WorkflowConfig.last_sync_at)).where(WorkflowConfig.enabled == True)
-        result = await db.execute(stmt)
-        last_sync = result.scalar()
-    except Exception as e:
-        logger.warning(f"Failed to get last sync time: {e}")
-        last_sync = None
-    finally:
-        await db.close()
+    async with SessionLocal() as db:
+        try:
+            stmt = select(func.max(WorkflowConfig.last_sync_at)).where(WorkflowConfig.enabled == True)
+            result = await db.execute(stmt)
+            last_sync = result.scalar()
+        except Exception as e:
+            logger.warning(f"Failed to get last sync time: {e}")
+            last_sync = None
 
     return {
         "scheduler": {
@@ -730,7 +728,21 @@ async def update_daily_summary_config(
                 db.add(projects_config)
         
         await db.commit()
-        
+
+        # 更新调度器
+        try:
+            from app.services.scheduler import get_scheduler
+            scheduler = get_scheduler()
+            scheduler.update_daily_summary_schedule(
+                enabled=config.get('enabled', True),
+                cron_hour=config.get('cron_hour', 8),
+                cron_minute=config.get('cron_minute', 0),
+                timezone=config.get('timezone', 'Asia/Shanghai'),
+            )
+            logger.info("Daily summary scheduler updated successfully")
+        except Exception as e:
+            logger.error(f"Failed to update daily summary scheduler: {e}")
+
         return {
             "success": True,
             "message": "配置已更新",

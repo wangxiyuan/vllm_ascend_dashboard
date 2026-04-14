@@ -121,14 +121,20 @@ async def _init_llm_provider_configs():
 async def lifespan(app: FastAPI):
     """应用生命周期管理"""
     logger.info("Starting vLLM Ascend Dashboard application...")
-    
+
     # 启动时初始化数据库
     await init_db()
 
     # 启动数据同步调度器
     try:
-        start_scheduler()
+        from app.services.scheduler import start_scheduler, get_scheduler
+        start_scheduler()  # 调用 scheduler.start() 来添加任务并启动
+        scheduler = get_scheduler()
         logger.info("Scheduler started successfully")
+        logger.info(f"Scheduler running: {scheduler.scheduler.running}")
+        # 记录已调度的任务
+        for job in scheduler.scheduler.get_jobs():
+            logger.info(f"Scheduled job: {job.id} - {job.name}, next run: {job.next_run_time}")
     except Exception as e:
         logger.error(f"Failed to start scheduler: {e}", exc_info=True)
 
@@ -136,6 +142,7 @@ async def lifespan(app: FastAPI):
 
     # 关闭时清理资源
     logger.info("Shutting down application...")
+    
     try:
         await stop_scheduler_async()
         logger.info("Scheduler stopped successfully")

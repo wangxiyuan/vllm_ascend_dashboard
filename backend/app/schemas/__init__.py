@@ -87,14 +87,16 @@ class PasswordChange(BaseModel):
     """用户修改密码 Schema"""
     old_password: str = Field(..., min_length=6, description="当前密码")
     new_password: str = Field(..., min_length=6, description="新密码")
-    
+
     @field_validator('new_password')
     @classmethod
-    def validate_new_password(cls, v: str) -> str:
+    def validate_new_password(cls, v: str, info) -> str:
         """验证新密码"""
         if len(v) < 6:
             raise ValueError('新密码长度至少为 6 位')
-        if v == cls.old_password if hasattr(cls, 'old_password') else False:
+        # 获取旧密码进行比较
+        old_password = info.data.get('old_password')
+        if old_password and v == old_password:
             raise ValueError('新密码不能与旧密码相同')
         return v
 

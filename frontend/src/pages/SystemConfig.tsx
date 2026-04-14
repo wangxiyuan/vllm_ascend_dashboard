@@ -852,14 +852,9 @@ function SystemConfig() {
       loading={configLoading}
       extra={
         isSuperAdmin && (
-          <Space>
-            <Button size="small" icon={<EditOutlined />} onClick={handleOpenAppConfig}>
-              编辑应用
-            </Button>
-            <Button size="small" icon={<GithubOutlined />} onClick={handleOpenGitHubConfig}>
-              编辑 GitHub
-            </Button>
-          </Space>
+          <Button size="small" icon={<EditOutlined />} onClick={handleOpenAppConfig}>
+            编辑
+          </Button>
         )
       }
     >
@@ -893,10 +888,17 @@ function SystemConfig() {
         {/* GitHub 配置 */}
         <Divider />
         <div>
-          <Title level={5} style={{ marginBottom: 12 }}>
-            <GithubOutlined style={{ marginRight: 8 }} />
-            GitHub 配置
-          </Title>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <Title level={5} style={{ margin: 0 }}>
+              <GithubOutlined style={{ marginRight: 8 }} />
+              GitHub 配置
+            </Title>
+            {isSuperAdmin && (
+              <Button size="small" icon={<GithubOutlined />} onClick={handleOpenGitHubConfig}>
+                编辑
+              </Button>
+            )}
+          </div>
           <Descriptions
             column={{ xxl: 2, xl: 2, lg: 2, md: 2, sm: 2, xs: 1 }}
             bordered
@@ -1202,7 +1204,17 @@ function SystemConfig() {
     return (
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
         {/* Git 缓存状态 */}
-        <Card title="Git 缓存状态" loading={gitCacheStatusLoading}>
+        <Card
+          title="Git 缓存状态"
+          loading={gitCacheStatusLoading}
+          extra={
+            <Space>
+              <Button size="small" onClick={handleOpenCacheDir}>
+                编辑
+              </Button>
+            </Space>
+          }
+        >
           <Row gutter={[16, 16]}>
             <Col span={12}>
               <Card
@@ -1307,7 +1319,6 @@ function SystemConfig() {
             <Button icon={<ExperimentOutlined />} onClick={handleFixCache} loading={isCacheUpdating}>
               修复缓存
             </Button>
-            <Button onClick={handleOpenCacheDir}>配置缓存目录</Button>
           </Space>
         </Card>
       </Space>
@@ -1644,7 +1655,7 @@ function SystemConfig() {
                       label: (
                         <Space>
                           <SyncOutlined />
-                          Git 缓存管理
+                          Git 缓存
                         </Space>
                       ),
                       children: renderProjectCacheTab(),
@@ -1654,7 +1665,7 @@ function SystemConfig() {
                       label: (
                         <Space>
                           <ExperimentOutlined />
-                          CI 同步配置
+                          CI结果
                         </Space>
                       ),
                       children: renderCISyncTab(),
@@ -1664,7 +1675,7 @@ function SystemConfig() {
                       label: (
                         <Space>
                           <DatabaseOutlined />
-                          模型同步配置
+                          模型测试
                         </Space>
                       ),
                       children: renderModelSyncTab(),
@@ -1674,7 +1685,7 @@ function SystemConfig() {
                       label: (
                         <Space>
                           <RobotOutlined />
-                          项目动态同步配置
+                          项目动态
                         </Space>
                       ),
                       children: renderDailySummaryTab(),
@@ -1700,13 +1711,6 @@ function SystemConfig() {
         footer={null}
         width={500}
       >
-        <Alert
-          message="提示"
-          description="配置修改将同时更新运行时配置和 .env 文件，无需重启服务"
-          type="success"
-          showIcon
-          style={{ marginBottom: 16 }}
-        />
         <Form
           form={appConfigForm}
           layout="vertical"
@@ -1761,13 +1765,6 @@ function SystemConfig() {
         footer={null}
         width={500}
       >
-        <Alert
-          message="提示"
-          description="配置修改将同时更新运行时配置和 .env 文件，无需重启服务"
-          type="success"
-          showIcon
-          style={{ marginBottom: 16 }}
-        />
         <Form
           form={gitHubConfigForm}
           layout="vertical"
@@ -1809,16 +1806,11 @@ function SystemConfig() {
           setIsDailySummaryConfigModalOpen(false)
           dailySummaryConfigForm.resetFields()
         }}
-        footer={null}
+        onOk={() => {
+          dailySummaryConfigForm.submit()
+        }}
         width={700}
       >
-        <Alert
-          message="提示"
-          description="配置修改后将保存到数据库，定时任务配置需要重启服务生效"
-          type="success"
-          showIcon
-          style={{ marginBottom: 16 }}
-        />
         <Form
           form={dailySummaryConfigForm}
           layout="vertical"
@@ -1854,7 +1846,7 @@ function SystemConfig() {
           >
             <Switch checkedChildren="启用" unCheckedChildren="禁用" />
           </Form.Item>
-          
+
           <Form.Item
             name="cron_hour"
             label="执行时间（时）"
@@ -1862,7 +1854,7 @@ function SystemConfig() {
           >
             <InputNumber min={0} max={23} style={{ width: '100%' }} />
           </Form.Item>
-          
+
           <Form.Item
             name="cron_minute"
             label="执行时间（分）"
@@ -1870,7 +1862,7 @@ function SystemConfig() {
           >
             <InputNumber min={0} max={59} style={{ width: '100%' }} />
           </Form.Item>
-          
+
           <Form.Item
             name="timezone"
             label="时区"
@@ -2150,13 +2142,6 @@ function SystemConfig() {
         footer={null}
         width={500}
       >
-        <Alert
-          message="提示"
-          description="配置修改将同时更新运行时配置和 .env 文件，无需重启服务"
-          type="success"
-          showIcon
-          style={{ marginBottom: 16 }}
-        />
         <Form
           form={syncConfigForm}
           layout="vertical"

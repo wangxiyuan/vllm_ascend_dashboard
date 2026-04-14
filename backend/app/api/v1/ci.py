@@ -383,16 +383,15 @@ async def trigger_sync(
 
         from app.db.base import SessionLocal
         from app.models import WorkflowConfig
-        db = SessionLocal()
-        try:
+        
+        # 使用 async with 正确管理异步会话
+        async with SessionLocal() as db:
             stmt = select(WorkflowConfig).where(WorkflowConfig.enabled == True)
             result = await db.execute(stmt)
             workflow_configs = result.scalars().all()
             progress = get_sync_progress()
             progress.total_workflows = len(workflow_configs)
             progress.start()  # 开始同步状态
-        finally:
-            await db.close()
 
         # 在后台异步执行同步任务
         import asyncio

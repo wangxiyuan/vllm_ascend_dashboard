@@ -13,7 +13,6 @@ from app.core.config import settings
 from app.db.base import SessionLocal
 from app.services.ci_collector import CICollector
 from app.services.github_client import GitHubClient
-from app.services.github_cache import update_repo
 
 logger = logging.getLogger(__name__)
 
@@ -55,10 +54,14 @@ class DataSyncScheduler:
         if event.exception:
             logger.error(f"Job {event.job_id} failed: {event.exception}")
         else:
-            logger.debug(f"Job {event.job_id} executed successfully")
+            logger.info(f"Job {event.job_id} executed successfully at {datetime.now()}")
 
     def start(self) -> None:
         """启动调度器"""
+        logger.info("=" * 60)
+        logger.info("SCHEDULER STARTING - Adding scheduled jobs")
+        logger.info("=" * 60)
+        
         if not self._initialized:
             self._initialize_github_client()
 
@@ -73,7 +76,7 @@ class DataSyncScheduler:
                 name="CI Data Sync",
                 replace_existing=True,
             )
-            logger.info(f"CI data sync scheduled every {sync_interval_minutes} minutes")
+            logger.info(f"[1/4] CI data sync scheduled every {sync_interval_minutes} minutes")
         except Exception as e:
             logger.error(f"Failed to add CI data sync job: {e}", exc_info=True)
 
@@ -87,7 +90,7 @@ class DataSyncScheduler:
                 name="Project Dashboard Cache Update",
                 replace_existing=True,
             )
-            logger.info(f"Project dashboard cache update scheduled every {cache_update_interval} minutes")
+            logger.info(f"[2/4] Project dashboard cache update scheduled every {cache_update_interval} minutes")
         except Exception as e:
             logger.error(f"Failed to add project dashboard cache update job: {e}", exc_info=True)
 
@@ -101,18 +104,18 @@ class DataSyncScheduler:
                 name="Model Report Sync",
                 replace_existing=True,
             )
-            logger.info(f"Model report sync scheduled every {model_sync_interval} minutes")
+            logger.info(f"[3/4] Model report sync scheduled every {model_sync_interval} minutes")
         except Exception as e:
             logger.error(f"Failed to add model report sync job: {e}", exc_info=True)
 
         # 每日总结生成任务 - 每天早上 8 点执行（可配置）
         try:
             from apscheduler.triggers.cron import CronTrigger
-            
+
             cron_hour = getattr(settings, 'DAILY_SUMMARY_CRON_HOUR', 8)
             cron_minute = getattr(settings, 'DAILY_SUMMARY_CRON_MINUTE', 0)
             enabled = getattr(settings, 'DAILY_SUMMARY_ENABLED', True)
-            
+
             if enabled:
                 self.scheduler.add_job(
                     self._generate_daily_summary_job,
@@ -121,31 +124,27 @@ class DataSyncScheduler:
                     name="Generate Daily Summary",
                     replace_existing=True,
                 )
-                logger.info(f"Daily summary generation scheduled at {cron_hour}:{cron_minute:02d}")
+                logger.info(f"[4/4] Daily summary generation scheduled at {cron_hour}:{cron_minute:02d} (enabled={enabled})")
+            else:
+                logger.info(f"[4/4] Daily summary generation DISABLED (enabled={enabled})")
         except Exception as e:
             logger.error(f"Failed to add daily summary job: {e}", exc_info=True)
-
-        # 启动调度器后，尝试从数据库读取配置并更新定时任务
-        try:
-            # 使用异步任务更新配置（在调度器启动后执行）
-            self.scheduler.add_job(
-                self._update_daily_summary_schedule_from_db,
-                trigger='date',  # 立即执行一次
-                id="update_daily_summary_schedule",
-                name="Update Daily Summary Schedule from DB",
-            )
-        except Exception as e:
-            logger.error(f"Failed to schedule config update: {e}", exc_info=True)
 
         # 启动调度器
         if not self.scheduler.running:
             try:
                 self.scheduler.start()
-                logger.info("DataSyncScheduler started")
+                logger.info("=" * 60)
+                logger.info("SCHEDULER STARTED SUCCESSFULLY")
+                jobs = self.scheduler.get_jobs()
+                logger.info(f"Total jobs scheduled: {len(jobs)}")
+                for job in jobs:
+                    logger.info(f"  - {job.id}: {job.name}, next_run={job.next_run_time}")
+                logger.info("=" * 60)
             except Exception as e:
                 logger.error(f"Failed to start scheduler: {e}", exc_info=True)
         else:
-            logger.info("DataSyncScheduler already running")
+            logger.info("Scheduler already running")
 
     def stop(self) -> None:
         """停止调度器"""
@@ -181,119 +180,154 @@ class DataSyncScheduler:
 
     async def _sync_ci_data_job(self) -> None:
         """CI 数据同步任务"""
-        logger.info("Starting CI data sync job")
+        logger.info("=" * 60)
+        logger.info("CI DATA SYNC JOB STARTED")
+        logger.info("=" * 60)
 
         if not self.github_client:
             self._initialize_github_client()
 
-        db = None
-        try:
-            db = SessionLocal()
-            collector = CICollector(
-                github_client=self.github_client,  # type: ignore
-                db_session=db,
-            )
+        async with SessionLocal() as db:
+            try:
+                collector = CICollector(
+                    github_client=self.github_client,  # type: ignore
+                    db_session=db,
+                )
 
-            # 使用配置中的同步策略
-            days_back = getattr(settings, 'CI_SYNC_DAYS_BACK', 7)
-            max_runs_per_workflow = getattr(settings, 'CI_SYNC_MAX_RUNS_PER_WORKFLOW', 100)
-            force_full_refresh = getattr(settings, 'CI_SYNC_FORCE_FULL_REFRESH', False)
+                # 使用配置中的同步策略
+                days_back = getattr(settings, 'CI_SYNC_DAYS_BACK', 7)
+                max_runs_per_workflow = getattr(settings, 'CI_SYNC_MAX_RUNS_PER_WORKFLOW', 100)
+                force_full_refresh = getattr(settings, 'CI_SYNC_FORCE_FULL_REFRESH', False)
 
-            logger.info(f"Sync strategy: days_back={days_back}, max_runs={max_runs_per_workflow}, force_full_refresh={force_full_refresh}")
+                logger.info(f"Sync strategy: days_back={days_back}, max_runs={max_runs_per_workflow}, force_full_refresh={force_full_refresh}")
 
-            collected = await collector.collect_workflow_runs(
-                days_back=days_back,
-                max_runs_per_workflow=max_runs_per_workflow,
-                force_full_refresh=force_full_refresh,
-            )
+                collected = await collector.collect_workflow_runs(
+                    days_back=days_back,
+                    max_runs_per_workflow=max_runs_per_workflow,
+                    force_full_refresh=force_full_refresh,
+                )
 
-            # 同步完成后，更新所有启用的 workflow 的 last_sync_at
-            from sqlalchemy import update
+                # 同步完成后，更新所有启用的 workflow 的 last_sync_at
+                from sqlalchemy import update
 
-            from app.models import WorkflowConfig
+                from app.models import WorkflowConfig
 
-            await db.execute(
-                update(WorkflowConfig)
-                .where(WorkflowConfig.enabled == True)
-                .values(last_sync_at=datetime.now(UTC))
-            )
-            await db.commit()
+                await db.execute(
+                    update(WorkflowConfig)
+                    .where(WorkflowConfig.enabled == True)
+                    .values(last_sync_at=datetime.now(UTC))
+                )
+                await db.commit()
 
-            logger.info(f"CI data sync completed. Collected {collected} runs, updated last_sync_at for all workflows")
+                logger.info("=" * 60)
+                logger.info(f"CI DATA SYNC JOB COMPLETED - Collected {collected} runs")
+                logger.info("=" * 60)
 
-        except Exception as e:
-            logger.error(f"CI data sync job failed: {e}", exc_info=True)
-            if db:
-                await db.rollback()
-        finally:
-            if db:
-                await db.close()
+            except Exception as e:
+                logger.error("=" * 60)
+                logger.error(f"CI DATA SYNC JOB FAILED - Error: {e}", exc_info=True)
+                logger.error("=" * 60)
+                # async with 会自动 rollback 和 close
+                raise
 
     def _update_project_dashboard_cache_job(self) -> None:
         """Project Dashboard Git 仓库缓存更新任务"""
-        logger.info("Starting project dashboard cache update job")
+        logger.info("=" * 60)
+        logger.info("PROJECT DASHBOARD CACHE UPDATE JOB STARTED")
+        logger.info("=" * 60)
 
         try:
-            success = update_repo()
-            if success:
-                logger.info("Project dashboard cache updated successfully")
+            from app.services.github_cache import get_github_cache, get_github_cache_for_repo
+            
+            results = []
+            
+            # 更新 vllm-ascend 仓库
+            logger.info("Updating vllm-ascend repository...")
+            ascend_cache = get_github_cache()
+            if not ascend_cache._is_repo_cloned():
+                success = ascend_cache.clone()
+                results.append(f"vllm-ascend: {'cloned' if success else 'clone failed'}")
             else:
-                logger.warning("Project dashboard cache update failed")
+                success = ascend_cache.pull()
+                results.append(f"vllm-ascend: {'pulled' if success else 'pull failed'}")
+            
+            # 更新 vllm 仓库
+            logger.info("Updating vllm repository...")
+            vllm_cache = get_github_cache_for_repo(owner="vllm-project", repo="vllm")
+            if not vllm_cache._is_repo_cloned():
+                success = vllm_cache.clone()
+                results.append(f"vllm: {'cloned' if success else 'clone failed'}")
+            else:
+                success = vllm_cache.pull()
+                results.append(f"vllm: {'pulled' if success else 'pull failed'}")
+            
+            logger.info(f"Cache update results: {', '.join(results)}")
+            logger.info("=" * 60)
+            logger.info("PROJECT DASHBOARD CACHE UPDATE JOB COMPLETED")
+            logger.info("=" * 60)
+            
         except Exception as e:
-            logger.error(f"Project dashboard cache update job failed: {e}", exc_info=True)
+            logger.error("=" * 60)
+            logger.error(f"PROJECT DASHBOARD CACHE UPDATE JOB FAILED - Error: {e}", exc_info=True)
+            logger.error("=" * 60)
+            raise
 
     async def _sync_model_reports_job(self) -> None:
         """模型报告同步任务"""
-        logger.info("Starting model report sync job")
+        logger.info("=" * 60)
+        logger.info("MODEL REPORT SYNC JOB STARTED")
+        logger.info("=" * 60)
 
         if not self.github_client:
             self._initialize_github_client()
 
-        db = None
-        try:
-            db = SessionLocal()
-            from app.services.model_sync_service import ModelSyncService
+        async with SessionLocal() as db:
+            try:
+                from app.services.model_sync_service import ModelSyncService
 
-            sync_service = ModelSyncService(db, self.github_client)
+                sync_service = ModelSyncService(db, self.github_client)
 
-            # 使用配置中的同步策略
-            days_back = getattr(settings, 'MODEL_SYNC_DAYS_BACK', 3)
-            runs_limit = getattr(settings, 'MODEL_SYNC_RUNS_LIMIT', 100)
+                # 使用配置中的同步策略
+                days_back = getattr(settings, 'MODEL_SYNC_DAYS_BACK', 3)
+                runs_limit = getattr(settings, 'MODEL_SYNC_RUNS_LIMIT', 100)
 
-            logger.info(f"Model sync strategy: days_back={days_back}, runs_limit={runs_limit}")
+                logger.info(f"Model sync strategy: days_back={days_back}, runs_limit={runs_limit}")
 
-            # 同步所有启用的模型同步配置
-            total, collected = await sync_service.sync_all_enabled_configs(
-                days_back=days_back,
-                runs_limit=runs_limit,
-            )
+                # 同步所有启用的模型同步配置
+                total, collected = await sync_service.sync_all_enabled_configs(
+                    days_back=days_back,
+                    runs_limit=runs_limit,
+                )
 
-            # 同步完成后，更新所有启用的 workflow 的 last_sync_at
-            from sqlalchemy import update
+                # 同步完成后，更新所有启用的 workflow 的 last_sync_at
+                from sqlalchemy import update
 
-            from app.models import ModelSyncConfig
+                from app.models import ModelSyncConfig
 
-            await db.execute(
-                update(ModelSyncConfig)
-                .where(ModelSyncConfig.enabled == True)
-                .values(last_sync_at=datetime.now(UTC))
-            )
-            await db.commit()
+                await db.execute(
+                    update(ModelSyncConfig)
+                    .where(ModelSyncConfig.enabled == True)
+                    .values(last_sync_at=datetime.now(UTC))
+                )
+                await db.commit()
 
-            logger.info(f"Model report sync completed. {total} configs, collected {collected} reports")
+                logger.info("=" * 60)
+                logger.info(f"MODEL REPORT SYNC JOB COMPLETED - {total} configs, collected {collected} reports")
+                logger.info("=" * 60)
 
-        except Exception as e:
-            logger.error(f"Model report sync job failed: {e}", exc_info=True)
-            if db:
-                await db.rollback()
-        finally:
-            if db:
-                await db.close()
+            except Exception as e:
+                logger.error("=" * 60)
+                logger.error(f"MODEL REPORT SYNC JOB FAILED - Error: {e}", exc_info=True)
+                logger.error("=" * 60)
+                # async with 会自动 rollback 和 close
+                raise
 
     async def _generate_daily_summary_job(self):
         """每日总结生成任务"""
-        logger.info("Starting daily summary generation job")
-
+        logger.info("=" * 60)
+        logger.info("DAILY SUMMARY GENERATION JOB STARTED")
+        logger.info("=" * 60)
+        
         try:
             from datetime import date, timedelta
             from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -333,75 +367,28 @@ class DataSyncScheduler:
 
                     try:
                         # 1. 获取数据
-                        logger.info(f"Fetching data for {project_id} on {yesterday}")
+                        logger.info(f"Fetching data for project: {project_id} on {yesterday}")
                         service = DailySummaryService(db)
                         await service.fetch_daily_data(project_id, yesterday)
 
                         # 2. 生成总结
-                        logger.info(f"Generating summary for {project_id} on {yesterday}")
+                        logger.info(f"Generating summary for project: {project_id} on {yesterday}")
                         await service.generate_summary(project_id, yesterday)
 
-                        logger.info(f"Daily summary completed for {project_id}")
+                        logger.info(f"Daily summary completed for project: {project_id}")
                     except Exception as e:
-                        logger.error(f"Failed to generate summary for {project_id}: {e}")
+                        logger.error(f"Failed to generate summary for {project_id}: {e}", exc_info=True)
 
                 await db.commit()
 
-            logger.info("Daily summary generation job completed")
+            logger.info("=" * 60)
+            logger.info("DAILY SUMMARY GENERATION JOB COMPLETED")
+            logger.info("=" * 60)
 
         except Exception as e:
-            logger.error(f"Daily summary generation job failed: {e}", exc_info=True)
-
-    async def _update_daily_summary_schedule_from_db(self):
-        """从数据库读取配置并更新每日总结定时任务"""
-        logger.info("Updating daily summary schedule from database")
-
-        try:
-            from apscheduler.triggers.cron import CronTrigger
-            from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-            from sqlalchemy.orm import sessionmaker
-            from sqlalchemy import select
-            from app.models import ProjectDashboardConfig
-
-            # 创建数据库会话
-            engine = create_async_engine(settings.DATABASE_URL, echo=False)
-            async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-
-            async with async_session() as db:
-                # 获取定时任务配置
-                stmt = select(ProjectDashboardConfig).where(
-                    ProjectDashboardConfig.config_key == 'daily_summary_schedule'
-                )
-                result = await db.execute(stmt)
-                config = result.scalar_one_or_none()
-
-                if config and config.config_value:
-                    enabled = config.config_value.get('enabled', True)
-                    cron_hour = config.config_value.get('cron_hour', 8)
-                    cron_minute = config.config_value.get('cron_minute', 0)
-                    timezone = config.config_value.get('timezone', 'Asia/Shanghai')
-
-                    # 更新定时任务
-                    if enabled:
-                        self.scheduler.remove_job('daily_summary_task')
-                        self.scheduler.add_job(
-                            self._generate_daily_summary_job,
-                            trigger=CronTrigger(hour=cron_hour, minute=cron_minute, timezone=timezone),
-                            id="daily_summary_task",
-                            name="Generate Daily Summary",
-                            replace_existing=True,
-                        )
-                        logger.info(f"Daily summary schedule updated from DB: {cron_hour}:{cron_minute:02d} {timezone}")
-                    else:
-                        self.scheduler.remove_job('daily_summary_task')
-                        logger.info("Daily summary task disabled from database config")
-                else:
-                    logger.info("No daily summary config in database, using default settings")
-
-            await engine.dispose()
-
-        except Exception as e:
-            logger.error(f"Failed to update daily summary schedule from DB: {e}", exc_info=True)
+            logger.error("=" * 60)
+            logger.error(f"DAILY SUMMARY GENERATION JOB FAILED - Error: {e}", exc_info=True)
+            logger.error("=" * 60)
 
     def update_daily_summary_schedule(self, enabled: bool, cron_hour: int, cron_minute: int, timezone: str = 'Asia/Shanghai'):
         """
@@ -417,7 +404,6 @@ class DataSyncScheduler:
 
         try:
             if enabled:
-                self.scheduler.remove_job('daily_summary_task')
                 self.scheduler.add_job(
                     self._generate_daily_summary_job,
                     trigger=CronTrigger(hour=cron_hour, minute=cron_minute, timezone=timezone),
@@ -427,7 +413,10 @@ class DataSyncScheduler:
                 )
                 logger.info(f"Daily summary schedule updated: {cron_hour}:{cron_minute:02d} {timezone}")
             else:
-                self.scheduler.remove_job('daily_summary_task')
+                try:
+                    self.scheduler.remove_job('daily_summary_task')
+                except Exception:
+                    pass  # 任务可能不存在，忽略错误
                 logger.info("Daily summary task disabled")
         except Exception as e:
             logger.error(f"Failed to update daily summary schedule: {e}", exc_info=True)
@@ -462,53 +451,46 @@ class DataSyncScheduler:
         if not self.github_client:
             self._initialize_github_client()
 
-        db = SessionLocal()
-        try:
-            collector = CICollector(
-                github_client=self.github_client,  # type: ignore
-                db_session=db,
-            )
+        async with SessionLocal() as db:
+            try:
+                collector = CICollector(
+                    github_client=self.github_client,  # type: ignore
+                    db_session=db,
+                )
 
-            collected = await collector.collect_workflow_runs(
-                days_back=days_back,
-                max_runs_per_workflow=max_runs_per_workflow,
-                force_full_refresh=force_full_refresh,
-            )
+                collected = await collector.collect_workflow_runs(
+                    days_back=days_back,
+                    max_runs_per_workflow=max_runs_per_workflow,
+                    force_full_refresh=force_full_refresh,
+                )
 
-            # 同步完成后，更新进度
-            from app.services.sync_progress import get_sync_progress
-            progress = get_sync_progress()
-            progress.complete()
+                # 同步完成后，更新进度
+                from app.services.sync_progress import get_sync_progress
+                progress = get_sync_progress()
+                progress.complete()
 
-            # 同步完成后，更新所有启用的 workflow 的 last_sync_at
-            from datetime import datetime
+                # 同步完成后，更新所有启用的 workflow 的 last_sync_at
+                from sqlalchemy import update
 
-            from sqlalchemy import update
+                from app.models import WorkflowConfig
 
-            from app.models import WorkflowConfig
+                await db.execute(
+                    update(WorkflowConfig)
+                    .where(WorkflowConfig.enabled == True)
+                    .values(last_sync_at=datetime.now(UTC))
+                )
+                await db.commit()
 
-            await db.execute(
-                update(WorkflowConfig)
-                .where(WorkflowConfig.enabled == True)
-                .values(last_sync_at=datetime.now(UTC))
-            )
-            await db.commit()
+                return {
+                    "success": True,
+                    "message": f"Successfully collected {collected} CI runs",
+                    "collected_count": collected,
+                }
 
-            return {
-                "success": True,
-                "message": f"Successfully collected {collected} CI runs",
-                "collected_count": collected,
-            }
-
-        except Exception as e:
-            logger.error(f"Manual sync failed: {e}", exc_info=True)
-            await db.rollback()
-            return {
-                "success": False,
-                "message": f"Sync failed: {str(e)}",
-            }
-        finally:
-            await db.close()
+            except Exception as e:
+                logger.error(f"Manual sync failed: {e}", exc_info=True)
+                # async with 会自动 rollback 和 close
+                raise
 
     def get_next_run_time(self, job_id: str) -> datetime | None:
         """

@@ -79,10 +79,8 @@ function UserManagement() {
 
   // 删除用户
   const handleDelete = (userId: number) => {
-    console.log('Deleting user:', userId)
     deleteMutation.mutate(userId, {
       onSuccess: (data) => {
-        console.log('Delete success:', data)
         message.success('用户已删除')
       },
       onError: (error: any) => {

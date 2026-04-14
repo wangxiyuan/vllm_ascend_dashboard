@@ -250,12 +250,6 @@ export function ModelTrendChart({
     )
   }
 
-  // 调试：查看数据结构
-  console.log('=== 趋势数据 ===')
-  console.log('data:', data)
-  console.log('第一个 item 的 tasks:', data[0]?.tasks)
-  console.log('第一个 item 的 metrics:', data[0]?.metrics)
-
   // 提取所有 task 和指标
   const taskMetricsMap = new Map<string, Map<string, any[]>>()
   

@@ -201,8 +201,7 @@ class JobOwner(Base):
 
     # 唯一约束：workflow_name + job_name 组合唯一
     __table_args__ = (
-        # 使用 UniqueConstraint 定义复合唯一约束
-        __import__('sqlalchemy').UniqueConstraint('workflow_name', 'job_name', name='uq_job_owner_workflow_job'),
+        UniqueConstraint('workflow_name', 'job_name', name='uq_job_owner_workflow_job'),
     )
 
 
@@ -219,7 +218,7 @@ class JobVisibility(Base):
 
     # 唯一约束：workflow_name + job_name 组合唯一
     __table_args__ = (
-        __import__('sqlalchemy').UniqueConstraint('workflow_name', 'job_name', name='uq_job_visibility_workflow_job'),
+        UniqueConstraint('workflow_name', 'job_name', name='uq_job_visibility_workflow_job'),
     )
 
 

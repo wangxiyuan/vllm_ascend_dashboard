@@ -216,11 +216,12 @@ deploy() {
     show_status
 
     echo ""
-    log_info "Default admin credentials:"
+    log_info "If this is a fresh installation, default admin credentials:"
     echo "  Username: admin"
     echo "  Password: admin123"
     echo ""
-    log_warn "Please change the default password after first login!"
+    log_warn "IMPORTANT: Please change the default password after first login!"
+    log_warn "See /docs/SECURITY.md for security best practices."
 }
 
 # Database migration function

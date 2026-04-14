@@ -75,14 +75,6 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError<{ detail?: string }>) => {
-    // 更详细的错误日志
-    console.error('API Error:', {
-      status: error.response?.status,
-      url: error.config?.url,
-      method: error.config?.method,
-      detail: error.response?.data?.detail,
-    })
-
     const originalRequest = error.config as any
 
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -106,10 +98,14 @@ apiClient.interceptors.response.use(
 
       // 如果正在刷新 token，将请求加入队列
       if (isRefreshing) {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
           subscribeTokenRefresh((token: string) => {
             originalRequest.headers.Authorization = `Bearer ${token}`
             resolve(apiClient(originalRequest))
+          })
+          // 同时添加错误处理，防止刷新失败时队列中的请求永远无法完成
+          subscribeTokenRefresh(() => {
+            reject(error)
           })
         })
       }
@@ -150,6 +146,7 @@ apiClient.interceptors.response.use(
         return Promise.reject(refreshError)
       } finally {
         isRefreshing = false
+        refreshSubscribers = [] // 清空队列，防止内存泄漏
       }
     }
 

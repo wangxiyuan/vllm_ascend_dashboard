@@ -73,8 +73,10 @@ services:
       - ./deploy/config/mysql.cnf:/etc/mysql/conf.d/custom.cnf:ro
       # Optional: initialization scripts
       - ./deploy/mysql/init:/docker-entrypoint-initdb.d:ro
-    ports:
-      - "${MYSQL_PORT:-3306}:3306"
+    # MySQL should NOT be exposed to public - only accessible by backend service
+    # If you need external access for maintenance, use SSH tunneling instead
+    # ports:
+    #   - "${MYSQL_PORT:-3306}:3306"
     networks:
       - dashboard-network
     restart: unless-stopped

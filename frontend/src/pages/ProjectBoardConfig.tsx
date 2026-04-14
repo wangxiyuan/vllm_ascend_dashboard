@@ -392,11 +392,8 @@ function ProjectBoardConfig() {
   const loadMeetingCalendar = async () => {
     setCalendarLoading(true)
     try {
-      console.log('Loading meeting calendar...')
       const calendar = await getMeetingCalendar(3)
-      console.log('Loaded meeting calendar:', calendar)
       setMeetingCalendar(calendar)
-      console.log('Meeting calendar state updated')
     } catch (error: any) {
       console.error('Failed to load meeting calendar:', error)
       message.error('加载日历失败：' + (error.response?.data?.detail || error.message))
@@ -408,13 +405,10 @@ function ProjectBoardConfig() {
   // 取消会议
   const handleCancelMeeting = async (date: string) => {
     try {
-      console.log('Cancelling meeting:', date)
       const result = await cancelMeeting(date)
-      console.log('Cancel result:', result)
       message.success('会议已取消，下次会议自动顺延')
       // 重新加载日历 - 使用空参数强制刷新
       await loadMeetingCalendar()
-      console.log('Calendar reloaded after cancel')
     } catch (error: any) {
       console.error('Failed to cancel meeting:', error)
       message.error('取消失败：' + (error.response?.data?.detail || error.message))
@@ -424,13 +418,10 @@ function ProjectBoardConfig() {
   // 恢复会议
   const handleRestoreMeeting = async (date: string) => {
     try {
-      console.log('Restoring meeting:', date)
       const result = await restoreMeeting(date)
-      console.log('Restore result:', result)
       message.success('会议已恢复')
       // 重新加载日历 - 使用空参数强制刷新
       await loadMeetingCalendar()
-      console.log('Calendar reloaded after restore')
     } catch (error: any) {
       console.error('Failed to restore meeting:', error)
       message.error('恢复失败：' + (error.response?.data?.detail || error.message))
@@ -1128,13 +1119,6 @@ function ProjectBoardConfig() {
         footer={null}
         width={600}
       >
-        <Alert
-          message="提示"
-          description="配置修改将同时更新运行时配置和 .env 文件，无需重启服务"
-          type="success"
-          showIcon
-          style={{ marginBottom: 16 }}
-        />
         <Form
           form={cacheDirForm}
           layout="vertical"

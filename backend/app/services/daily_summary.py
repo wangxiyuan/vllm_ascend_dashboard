@@ -756,7 +756,8 @@ class DailySummaryService:
             existing.generation_time_seconds = kwargs.get('generation_time_seconds')
             existing.status = kwargs.get('status', 'success')
             existing.error_message = kwargs.get('error_message')
-            existing.regenerated_at = datetime.now(timezone.utc)
+            existing.generated_at = datetime.now(timezone.utc)  # 更新生成时间
+            existing.regenerated_at = datetime.now(timezone.utc)  # 标记为重新生成
             summary = existing
         else:
             # 插入新记录 - 需要将 summary_date 转换为 data_date

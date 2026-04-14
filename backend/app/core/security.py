@@ -1,6 +1,7 @@
 """
 安全工具模块
 """
+import logging
 from datetime import UTC, datetime, timedelta
 
 import bcrypt
@@ -24,7 +25,15 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     hashed_bytes = hashed_password.encode('utf-8')
     try:
         return bcrypt.checkpw(password_bytes, hashed_bytes)
-    except Exception:
+    except ValueError as e:
+        # 捕获 bcrypt 特定错误（如无效的 hash）
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Password verification error: {e}")
+        return False
+    except Exception as e:
+        # 记录其他异常以便调试
+        logger = logging.getLogger(__name__)
+        logger.error(f"Unexpected error during password verification: {e}")
         return False
 
 
@@ -70,8 +79,13 @@ def decode_token(token: str) -> dict | None:
     except ExpiredSignatureError:
         # Token 已过期
         return None
-    except JWTError:
-        # Token 无效
+    except JWTError as e:
+        # Token 无效 - 记录详细错误以便调试
+        logger = logging.getLogger(__name__)
+        logger.warning(f"JWT decode error: {e}, token: {token[:20]}...")
         return None
-    except Exception:
+    except Exception as e:
+        # 记录其他异常以便调试
+        logger = logging.getLogger(__name__)
+        logger.error(f"Unexpected error during token decoding: {e}")
         return None

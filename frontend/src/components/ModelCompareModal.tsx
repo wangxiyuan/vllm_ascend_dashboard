@@ -33,12 +33,6 @@ export function ModelCompareModal({
   if (!comparisonData) return null
 
   const { reports, changes, tasks_comparison } = comparisonData
-  
-  // 调试信息：查看 tasks_comparison 数据
-  console.log('=== 报告对比数据 ===')
-  console.log('reports:', reports)
-  console.log('tasks_comparison:', tasks_comparison)
-  console.log('tasks_comparison.length:', tasks_comparison?.length)
 
   // 智能格式化数值（不强制百分比）
   const formatValue = (value: any) => {

@@ -991,13 +991,6 @@ function CIBoardConfig() {
         footer={null}
         width={500}
       >
-        <Alert
-          message="提示"
-          description="配置修改将同时更新运行时配置和 .env 文件，无需重启服务"
-          type="success"
-          showIcon
-          style={{ marginBottom: 16 }}
-        />
         <Form
           form={syncConfigForm}
           layout="vertical"

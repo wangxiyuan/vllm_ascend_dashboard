@@ -1447,22 +1447,17 @@ function ModelBoardConfig() {
   // 删除报告
   const deleteReportMutation = useMutation({
     mutationFn: async ({ modelId, reportId }: { modelId: number; reportId: number }) => {
-      console.log('删除报告:', { modelId, reportId })
       const result = await deleteReport(modelId, reportId)
-      console.log('删除结果:', result)
       return result
     },
     onMutate: ({ reportId }) => {
       setDeletingReportId(reportId)
     },
     onSuccess: (data) => {
-      console.log('删除成功回调:', data)
       message.success('报告已删除')
       setDeletingReportId(null)
       if (reportListModelId) {
-        refetchReports().then(() => {
-          console.log('报告列表已刷新')
-        })
+        refetchReports()
       }
     },
     onError: (error: any) => {
