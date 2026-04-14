@@ -237,13 +237,13 @@ migrate_database() {
         return 1
     fi
 
-    # Run migration script (upgrades to latest version)
-    log_info "Executing database upgrade script..."
-    if docker exec "$BACKEND_CONTAINER" python scripts/upgrade_db.py; then
-        log_success "Database migration completed successfully!"
+    # Run migration script (upgrades to v0.0.1)
+    log_info "Executing database upgrade to v0.0.1..."
+    if docker exec "$BACKEND_CONTAINER" python scripts/upgrade_v0.0.1.py; then
+        log_success "Database upgrade to v0.0.1 completed successfully!"
         return 0
     else
-        log_error "Database migration failed!"
+        log_error "Database upgrade failed!"
         return 1
     fi
 }
@@ -380,7 +380,6 @@ upgrade() {
     echo ""
     echo "========================================"
     echo "  vLLM Ascend Dashboard Upgrade"
-    echo "  Target Version: v0.2.1"
     echo "  Features: Model Board + Official Doc URL"
     echo "========================================"
     echo ""
@@ -440,7 +439,7 @@ show_help() {
     echo ""
     echo "========================================"
     echo "  vLLM Ascend Dashboard - Deployment Script"
-    echo "  Version: v0.2.1"
+    echo "  Version: v0.0.1"
     echo "========================================"
     echo ""
     echo "Usage: $0 [command]"
@@ -467,20 +466,15 @@ show_help() {
     echo ""
     echo "========================================"
     echo ""
-    echo "Upgrade Guide (v0.1.0 → v0.2.1):"
+    echo "Version History:"
+    echo "  v0.0.1 - Current version"
+    echo "    - Merged JobVisibility into JobOwner"
+    echo "    - Removed unused config_json column"
     echo ""
-    echo "  Version History:"
-    echo "    v0.2.0 - Model Board Management"
-    echo "    v0.2.1 - Official Documentation Links"
-    echo ""
-    echo "  New in v0.2.x:"
-    echo "    - Model Board Management (模型看板管理)"
-    echo "    - Model Report Upload & Sync (报告上传与同步)"
-    echo "    - Report Trend Analysis (趋势分析)"
-    echo "    - Report Comparison (报告对比)"
-    echo "    - vLLM Startup Commands (启动命令)"
-    echo "    - Model Board Configuration (模型看板配置)"
-    echo "    - Official Documentation Links (官方文档链接)"
+    echo "  Upgrade from v0.2.x:"
+    echo "    The upgrade script will automatically:"
+    echo "    1. Merge job_visibility table into job_owners"
+    echo "    2. Remove config_json from llm_provider_configs"
     echo ""
     echo "  Option 1: Automatic upgrade (recommended)"
     echo "    $0 upgrade"
@@ -490,14 +484,6 @@ show_help() {
     echo "    2. $0 stop"
     echo "    3. $0 start"
     echo "    4. $0 migrate"
-    echo ""
-    echo "  Configuration:"
-    echo "    After upgrade, visit:"
-    echo "    - Model Board: http://localhost:3000/models"
-    echo "    - Admin Panel: http://localhost:3000/admin"
-    echo "      - Model Sync Configs (模型同步配置)"
-    echo "      - Model Series Config (模型系列配置) [TODO]"
-    echo "      - Metrics Config (指标配置) [TODO]"
     echo ""
     echo "========================================"
     echo ""
