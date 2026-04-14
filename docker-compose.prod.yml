@@ -28,8 +28,8 @@ services:
       - backend_data:/app/data
       # Log files
       - backend_logs:/app/logs
-      # Optional: external configuration file
-      - ./deploy/config/backend.env:/app/.env:ro
+      # Note: Using environment variables from .env.production instead of external config file
+      # - ./deploy/config/backend.env:/app/.env:ro  # Commented out - use .env.production instead
     # Do NOT expose backend port to public - only accessible via nginx proxy
     # ports:
     #   - "${BACKEND_PORT:-8000}:8000"
