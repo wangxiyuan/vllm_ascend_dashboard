@@ -3,6 +3,7 @@
 用于读取和更新 .env 文件
 """
 import logging
+import os
 from pathlib import Path
 from typing import Any
 
@@ -12,11 +13,14 @@ logger = logging.getLogger(__name__)
 class EnvConfigManager:
     """
     .env 文件配置管理器
-    
+
     功能：
     - 读取 .env 文件
     - 更新配置项
     - 保存 .env 文件
+
+    注意：在生产环境（Docker 容器）中，配置通过环境变量传递，
+         不需要读写 .env 文件
     """
 
     def __init__(self, env_file_path: str | None = None):
@@ -26,6 +30,15 @@ class EnvConfigManager:
         Args:
             env_file_path: .env 文件路径，默认为项目根目录的 .env 文件
         """
+        # 检查是否在生产环境（通过环境变量判断）
+        self.is_production = os.getenv('ENVIRONMENT') == 'production'
+        
+        if self.is_production:
+            logger.info("Running in production mode, using environment variables")
+            self.env_file = None
+            self.config = {}
+            return
+        
         if env_file_path:
             self.env_file = Path(env_file_path)
         else:
@@ -85,10 +98,15 @@ class EnvConfigManager:
     def save(self) -> bool:
         """
         保存配置到 .env 文件
-        
+
         Returns:
             是否保存成功
         """
+        # 生产环境不保存文件
+        if self.is_production:
+            logger.info("Production mode: configuration saved to memory only (using environment variables)")
+            return True
+        
         try:
             # 备份原文件
             if self.env_file.exists():
