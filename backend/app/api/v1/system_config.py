@@ -29,13 +29,30 @@ async def get_system_config(
     需要超级管理员权限（super_admin）
     返回可公开的配置信息（敏感数据如 token 会脱敏显示）
     """
+    # 时区配置从数据库读取，默认 Asia/Shanghai
+    from sqlalchemy import select
+    from app.models import ProjectDashboardConfig
+    from app.db.base import SessionLocal
+    
+    timezone_str = 'Asia/Shanghai'  # 默认时区
+    try:
+        with SessionLocal() as db:
+            stmt = select(ProjectDashboardConfig).where(
+                ProjectDashboardConfig.config_key == 'daily_summary_schedule'
+            )
+            result = db.execute(stmt).scalar_one_or_none()
+            if result and 'timezone' in result.config_value:
+                timezone_str = result.config_value['timezone']
+    except Exception as e:
+        logger.warning(f"Failed to load timezone from database, using default: {timezone_str}. Error: {e}")
+    
     # 只返回非敏感配置
     return {
         "app_config": {
             "environment": settings.ENVIRONMENT,
             "debug": settings.DEBUG,
             "log_level": settings.LOG_LEVEL,
-            "timezone": settings.TIMEZONE,
+            "timezone": timezone_str,  # 从数据库读取
         },
         "github_config": {
             "owner": settings.GITHUB_OWNER,

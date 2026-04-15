@@ -29,8 +29,26 @@ class DataSyncScheduler:
 
     def __init__(self):
         """初始化调度器"""
+        # 时区从数据库读取，默认 Asia/Shanghai
+        from sqlalchemy import select
+        from app.models import ProjectDashboardConfig
+        from app.db.base import SessionLocal
+        
+        timezone_str = 'Asia/Shanghai'  # 默认时区
+        try:
+            with SessionLocal() as db:
+                stmt = select(ProjectDashboardConfig).where(
+                    ProjectDashboardConfig.config_key == 'daily_summary_schedule'
+                )
+                result = db.execute(stmt).scalar_one_or_none()
+                if result and 'timezone' in result.config_value:
+                    timezone_str = result.config_value['timezone']
+                    logger.info(f"Loaded timezone from database: {timezone_str}")
+        except Exception as e:
+            logger.warning(f"Failed to load timezone from database, using default: {timezone_str}. Error: {e}")
+        
         self.scheduler = AsyncIOScheduler(
-            timezone=settings.TIMEZONE if hasattr(settings, 'TIMEZONE') else 'UTC',
+            timezone=timezone_str,
             job_defaults={
                 'coalesce': True,  # 合并错过的执行
                 'max_instances': 1,  # 同一任务最多只有 1 个实例运行
