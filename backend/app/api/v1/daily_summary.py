@@ -339,7 +339,7 @@ async def get_daily_data(
         # 获取 Issues - 使用索引提示避免 MySQL filesort
         issue_stmt = select(DailyIssue).with_hint(
             DailyIssue, 
-            "USE INDEX (idx_daily_prs_project_date_created)"
+            "USE INDEX (idx_daily_issues_project_date_created)"
         ).where(
             DailyIssue.project == project,
             DailyIssue.data_date == data_date
@@ -350,7 +350,7 @@ async def get_daily_data(
         # 获取 Commits - 使用索引提示避免 MySQL filesort
         commit_stmt = select(DailyCommit).with_hint(
             DailyCommit, 
-            "USE INDEX (idx_daily_prs_project_date_created)"
+            "USE INDEX (idx_daily_commits_project_date_created)"
         ).where(
             DailyCommit.project == project,
             DailyCommit.data_date == data_date

@@ -29,7 +29,6 @@ async def check_index_exists(index_name: str, table_name: str = "daily_prs") -> 
     """Check if index exists (works with both MySQL and SQLite)"""
     try:
         async with engine.begin() as conn:
-            # Use SQLAlchemy inspect for cross-database compatibility
             def _get_indexes(connection):
                 inspector = inspect(connection)
                 return inspector.get_indexes(table_name)
