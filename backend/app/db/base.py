@@ -4,6 +4,7 @@
 import logging
 from collections.abc import AsyncGenerator
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import settings
@@ -32,7 +33,13 @@ else:
     engine_kwargs["pool_timeout"] = 60  # 连接超时时间
     engine_kwargs["pool_recycle"] = 3600  # 1 小时后回收连接
     engine_kwargs["pool_pre_ping"] = True  # MySQL 连接探活
+    
+    # MySQL 特定配置：增加 sort_buffer_size 避免 "Out of sort memory" 错误
+    engine_kwargs["connect_args"]["init_commands"] = [
+        "SET SESSION sort_buffer_size = 4 * 1024 * 1024"  # 4MB
+    ]
     logger.info("Using MySQL/PostgreSQL database - connection pooling enabled (pool_size=20, max_overflow=20)")
+    logger.info("MySQL session sort_buffer_size set to 4MB")
 
 # 创建异步数据库引擎
 engine = create_async_engine(settings.DATABASE_URL, **engine_kwargs)

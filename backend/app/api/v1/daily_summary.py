@@ -325,24 +325,33 @@ async def get_daily_data(
     try:
         data_date = DateType.fromisoformat(date)
 
-        # 获取 PRs
-        pr_stmt = select(DailyPR).where(
+        # 获取 PRs - 使用索引提示避免 MySQL filesort
+        pr_stmt = select(DailyPR).with_hint(
+            DailyPR, 
+            "USE INDEX (idx_daily_prs_project_date_created)"
+        ).where(
             DailyPR.project == project,
             DailyPR.data_date == data_date
         ).order_by(DailyPR.created_at.desc())
         pr_result = await db.execute(pr_stmt)
         prs = pr_result.scalars().all()
 
-        # 获取 Issues
-        issue_stmt = select(DailyIssue).where(
+        # 获取 Issues - 使用索引提示避免 MySQL filesort
+        issue_stmt = select(DailyIssue).with_hint(
+            DailyIssue, 
+            "USE INDEX (idx_daily_prs_project_date_created)"
+        ).where(
             DailyIssue.project == project,
             DailyIssue.data_date == data_date
         ).order_by(DailyIssue.created_at.desc())
         issue_result = await db.execute(issue_stmt)
         issues = issue_result.scalars().all()
 
-        # 获取 Commits
-        commit_stmt = select(DailyCommit).where(
+        # 获取 Commits - 使用索引提示避免 MySQL filesort
+        commit_stmt = select(DailyCommit).with_hint(
+            DailyCommit, 
+            "USE INDEX (idx_daily_prs_project_date_created)"
+        ).where(
             DailyCommit.project == project,
             DailyCommit.data_date == data_date
         ).order_by(DailyCommit.committed_at.desc())

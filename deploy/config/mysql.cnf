@@ -12,6 +12,14 @@ max_allowed_packet = 64M
 wait_timeout = 28800
 interactive_timeout = 28800
 
+# ============================================================
+# Fix "Out of sort memory" error
+# ============================================================
+sort_buffer_size = 4M
+group_concat_max_len = 1048576
+tmp_table_size = 64M
+max_heap_table_size = 64M
+
 # InnoDB Settings
 innodb_buffer_pool_size = 256M
 innodb_log_file_size = 64M
