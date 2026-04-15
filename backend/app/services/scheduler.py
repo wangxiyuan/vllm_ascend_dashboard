@@ -109,8 +109,29 @@ class DataSyncScheduler:
             logger.error(f"Failed to add model report sync job: {e}", exc_info=True)
 
         # 每日总结生成任务 - 每天早上 8 点执行（可配置）
+        # 时区从数据库读取，默认 Asia/Shanghai
         try:
             from apscheduler.triggers.cron import CronTrigger
+
+            # 从数据库读取时区配置，如果数据库未初始化则使用默认值
+            timezone_str = 'Asia/Shanghai'  # 默认时区
+            try:
+                from sqlalchemy import select
+                from app.models import ProjectDashboardConfig
+                from app.db.base import SessionLocal
+                import asyncio
+
+                # 同步方式获取数据库时区配置（阻塞调用，因为调度器初始化是同步的）
+                with SessionLocal() as db:
+                    stmt = select(ProjectDashboardConfig).where(
+                        ProjectDashboardConfig.config_key == 'daily_summary_schedule'
+                    )
+                    result = db.execute(stmt).scalar_one_or_none()
+                    if result and 'timezone' in result.config_value:
+                        timezone_str = result.config_value['timezone']
+                        logger.info(f"Loaded timezone from database: {timezone_str}")
+            except Exception as e:
+                logger.warning(f"Failed to load timezone from database, using default: {timezone_str}. Error: {e}")
 
             cron_hour = getattr(settings, 'DAILY_SUMMARY_CRON_HOUR', 8)
             cron_minute = getattr(settings, 'DAILY_SUMMARY_CRON_MINUTE', 0)
@@ -119,12 +140,12 @@ class DataSyncScheduler:
             if enabled:
                 self.scheduler.add_job(
                     self._generate_daily_summary_job,
-                    trigger=CronTrigger(hour=cron_hour, minute=cron_minute, timezone=settings.TIMEZONE),
+                    trigger=CronTrigger(hour=cron_hour, minute=cron_minute, timezone=timezone_str),
                     id="daily_summary_task",
                     name="Generate Daily Summary",
                     replace_existing=True,
                 )
-                logger.info(f"[4/4] Daily summary generation scheduled at {cron_hour}:{cron_minute:02d} (enabled={enabled})")
+                logger.info(f"[4/4] Daily summary generation scheduled at {cron_hour}:{cron_minute:02d} {timezone_str} (enabled={enabled})")
             else:
                 logger.info(f"[4/4] Daily summary generation DISABLED (enabled={enabled})")
         except Exception as e:

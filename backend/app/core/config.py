@@ -13,7 +13,6 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
     LOG_LEVEL: str = "INFO"
-    TIMEZONE: str = "Asia/Shanghai"  # 默认北京时间
 
     # GitHub 配置
     GITHUB_TOKEN: str

@@ -79,6 +79,7 @@ async def update_app_config(
     同时更新运行时配置和 .env 文件
     """
     from app.core.config_manager import update_env_config
+    import logging
 
     updates = []
     env_updates = {}
@@ -90,9 +91,28 @@ async def update_app_config(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"日志级别必须是：{', '.join(valid_levels)}",
             )
+        
+        # 更新运行时配置
+        old_level = settings.LOG_LEVEL
         settings.LOG_LEVEL = log_level.upper()
         env_updates['log_level'] = log_level.upper()
-        updates.append(f"日志级别：{log_level}")
+        updates.append(f"日志级别：{old_level} → {log_level.upper()}")
+        
+        # 动态调整 logging 级别（无需重启）
+        try:
+            new_level = getattr(logging, log_level.upper())
+            root_logger = logging.getLogger()
+            root_logger.setLevel(new_level)
+            
+            # 更新所有 handler 的级别
+            for handler in root_logger.handlers:
+                handler.setLevel(new_level)
+            
+            updates.append("✅ 日志级别已动态调整（无需重启）")
+            logger.info(f"Log level dynamically changed from {old_level} to {log_level.upper()}")
+        except Exception as e:
+            logger.error(f"Failed to dynamically adjust log level: {e}")
+            updates.append("⚠️ 日志级别已更新，但需要重启服务才能生效")
 
     if debug is not None:
         settings.DEBUG = debug
