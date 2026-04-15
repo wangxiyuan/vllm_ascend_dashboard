@@ -286,7 +286,7 @@ async def _create_daily_summary_tables(db, is_mysql: bool):
         if not is_mysql:
             await db.execute(text("CREATE INDEX idx_daily_prs_project ON daily_prs(project)"))
             await db.execute(text("CREATE INDEX idx_daily_prs_date ON daily_prs(data_date)"))
-        
+
         print("    ✅ Created daily_prs")
     else:
         print("    ✓ daily_prs already exists")

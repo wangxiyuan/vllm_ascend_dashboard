@@ -14,7 +14,7 @@ class DailyPR(Base):
     __tablename__ = "daily_prs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    project = Column(String(100), nullable=False, index=True)
+    project = Column(String(100), nullable=False)
     pr_number = Column(Integer, nullable=False)
     title = Column(String(500), nullable=False)
     state = Column(String(20), nullable=False)
@@ -25,11 +25,13 @@ class DailyPR(Base):
     labels = Column(JSON)
     body = Column(Text)
     commits = Column(JSON, nullable=False)
-    data_date = Column(Date, nullable=False, index=True)
+    data_date = Column(Date, nullable=False)
     fetched_at = Column(TIMESTAMP, default=lambda: datetime.now(UTC))
 
     __table_args__ = (
         UniqueConstraint('project', 'pr_number', 'data_date', name='uq_daily_pr_project_number_date'),
+        # Composite index for queries filtering by project/data_date and sorting by created_at
+        # Fixes MySQL "Out of sort memory" error
     )
 
 
