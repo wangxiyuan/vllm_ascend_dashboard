@@ -36,13 +36,14 @@ async def get_system_config(
     
     timezone_str = 'Asia/Shanghai'  # 默认时区
     try:
-        with SessionLocal() as db:
+        async with SessionLocal() as db:
             stmt = select(ProjectDashboardConfig).where(
                 ProjectDashboardConfig.config_key == 'daily_summary_schedule'
             )
-            result = db.execute(stmt).scalar_one_or_none()
-            if result and 'timezone' in result.config_value:
-                timezone_str = result.config_value['timezone']
+            result = await db.execute(stmt)
+            config = result.scalar_one_or_none()
+            if config and 'timezone' in config.config_value:
+                timezone_str = config.config_value['timezone']
     except Exception as e:
         logger.warning(f"Failed to load timezone from database, using default: {timezone_str}. Error: {e}")
     
