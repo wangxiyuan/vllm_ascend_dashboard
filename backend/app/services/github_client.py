@@ -620,28 +620,56 @@ class GitHubClient:
             "sort": "created",
             "direction": "desc",
             "per_page": 100,
+            "page": 1,
         }
 
         logger.info(f"Fetching pull requests by date range ({start_time} to {end_time})")
-        result = await self._request("GET", url, params=params)
 
-        # 过滤时间范围
         # 将 start_time 和 end_time 转换为 UTC 进行比较
         start_time_utc = start_time.astimezone(timezone.utc) if start_time.tzinfo else start_time.replace(tzinfo=timezone.utc)
         end_time_utc = end_time.astimezone(timezone.utc) if end_time.tzinfo else end_time.replace(tzinfo=timezone.utc)
         
         prs = []
-        for pr in result:
-            # GitHub API 返回的 created_at 是 UTC 时间（格式：2026-04-08T12:34:56Z）
-            created_at = datetime.fromisoformat(pr["created_at"].replace("Z", "+00:00"))
-            # 转换为 UTC 时间进行比较
-            created_at_utc = created_at.astimezone(timezone.utc)
-            if start_time_utc <= created_at_utc <= end_time_utc:
-                # 获取该 PR 的 commits 列表
-                commits = await self.get_pr_commits(owner, repo, pr["number"])
-                pr["commits"] = commits
-                prs.append(pr)
+        page = 1
 
+        while True:
+            params["page"] = page
+            result = await self._request("GET", url, params=params)
+
+            if not result:
+                break
+
+            found_in_range = False
+            for pr in result:
+                # GitHub API 返回的 created_at 是 UTC 时间（格式：2026-04-08T12:34:56Z）
+                created_at = datetime.fromisoformat(pr["created_at"].replace("Z", "+00:00"))
+                created_at_utc = created_at.astimezone(timezone.utc)
+                
+                if created_at_utc < start_time_utc:
+                    # 因为是按 created 降序排列，一旦找到早于 start_time 的 PR，后面的都更早，可以停止
+                    logger.info(f"Stopping pagination at page {page} - PR {pr['number']} created at {created_at_utc} is before start time {start_time_utc}")
+                    found_in_range = False
+                    break
+                
+                if start_time_utc <= created_at_utc <= end_time_utc:
+                    # 获取该 PR 的 commits 列表
+                    commits = await self.get_pr_commits(owner, repo, pr["number"])
+                    pr["commits"] = commits
+                    prs.append(pr)
+                    found_in_range = True
+
+            if not found_in_range and page > 1:
+                # 如果这一页没有找到在时间范围内的 PR，且不是第一页，说明已经遍历完了
+                break
+
+            if len(result) < 100:
+                # 如果这一页的结果少于 100，说明是最后一页
+                break
+
+            page += 1
+            logger.info(f"Fetching page {page} for pull requests")
+
+        logger.info(f"Found {len(prs)} pull requests in date range")
         return prs
 
     async def get_pr_commits(
@@ -734,25 +762,54 @@ class GitHubClient:
             "sort": "created",
             "direction": "desc",
             "per_page": 100,
+            "page": 1,
         }
 
         logger.info(f"Fetching issues by date range ({start_time} to {end_time})")
-        result = await self._request("GET", url, params=params)
 
-        # 过滤时间范围和排除 PR
         # 将 start_time 和 end_time 转换为 UTC 进行比较
         start_time_utc = start_time.astimezone(timezone.utc) if start_time.tzinfo else start_time.replace(tzinfo=timezone.utc)
         end_time_utc = end_time.astimezone(timezone.utc) if end_time.tzinfo else end_time.replace(tzinfo=timezone.utc)
         
         issues = []
-        for issue in result:
-            if "pull_request" in issue:  # 跳过 PR
-                continue
-            # GitHub API 返回的 created_at 是 UTC 时间（格式：2026-04-08T12:34:56Z）
-            created_at = datetime.fromisoformat(issue["created_at"].replace("Z", "+00:00"))
-            # 转换为 UTC 时间进行比较
-            created_at_utc = created_at.astimezone(timezone.utc)
-            if start_time_utc <= created_at_utc <= end_time_utc:
-                issues.append(issue)
+        page = 1
 
+        while True:
+            params["page"] = page
+            result = await self._request("GET", url, params=params)
+
+            if not result:
+                break
+
+            found_in_range = False
+            for issue in result:
+                if "pull_request" in issue:  # 跳过 PR
+                    continue
+                
+                # GitHub API 返回的 created_at 是 UTC 时间（格式：2026-04-08T12:34:56Z）
+                created_at = datetime.fromisoformat(issue["created_at"].replace("Z", "+00:00"))
+                created_at_utc = created_at.astimezone(timezone.utc)
+                
+                if created_at_utc < start_time_utc:
+                    # 因为是按 created 降序排列，一旦找到早于 start_time 的 issue，后面的都更早，可以停止
+                    logger.info(f"Stopping pagination at page {page} - Issue {issue['number']} created at {created_at_utc} is before start time {start_time_utc}")
+                    found_in_range = False
+                    break
+                
+                if start_time_utc <= created_at_utc <= end_time_utc:
+                    issues.append(issue)
+                    found_in_range = True
+
+            if not found_in_range and page > 1:
+                # 如果这一页没有找到在时间范围内的 issue，且不是第一页，说明已经遍历完了
+                break
+
+            if len(result) < 100:
+                # 如果这一页的结果少于 100，说明是最后一页
+                break
+
+            page += 1
+            logger.info(f"Fetching page {page} for issues")
+
+        logger.info(f"Found {len(issues)} issues in date range")
         return issues
