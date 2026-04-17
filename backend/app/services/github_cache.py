@@ -699,14 +699,14 @@ class GitHubLocalCache:
             end_str = end_local.strftime('%Y-%m-%d %H:%M:%S')
 
             # Use git log with date string filters
-            # --since and --until accept human-readable date strings
+            # Use %x1f (unit separator) as field separator to avoid issues with | in commit messages
             env = self._get_git_env()
             result = subprocess.run(
                 [
                     "git", "log",
                     "--since", start_str,
                     "--until", end_str,
-                    "--pretty=format:%H|%s|%an|%ae|%aI"
+                    "--pretty=format:%H%x1f%s%x1f%an%x1f%ae%x1f%aI"
                 ],
                 cwd=str(self.cache_dir),
                 check=True,
@@ -721,7 +721,7 @@ class GitHubLocalCache:
                 if not line.strip():
                     continue
 
-                parts = line.split('|')
+                parts = line.split('\x1f')
                 if len(parts) >= 5:
                     commits.append({
                         "sha": parts[0],

@@ -4,6 +4,7 @@
 import asyncio
 import logging
 from datetime import datetime, date, time, timezone
+from zoneinfo import ZoneInfo
 from typing import Optional, Tuple
 
 from sqlalchemy import select, func
@@ -234,7 +235,6 @@ class DailySummaryService:
         """
         # 1. 计算时间范围：北京时间 00:00:00 - 23:59:59
         # 使用 Asia/Shanghai 时区（UTC+8）
-        from zoneinfo import ZoneInfo
         shanghai_tz = ZoneInfo('Asia/Shanghai')
         
         start_time = datetime.combine(fetch_date, time.min, tzinfo=shanghai_tz)
@@ -496,6 +496,15 @@ class DailySummaryService:
 
             # 保存 Commits
             for commit in commits:
+                # Validate required fields
+                if not commit.get("committed_at"):
+                    logger.warning(f"Commit missing committed_at, using fetch_date as fallback: {commit.get('sha')}")
+                    # Use fetch_date with time 00:00:00 as fallback
+                    shanghai_tz = ZoneInfo('Asia/Shanghai')
+                    fallback_datetime = datetime.combine(fetch_date, time.min, tzinfo=shanghai_tz)
+                    fallback_datetime_utc = fallback_datetime.astimezone(timezone.utc)
+                    commit["committed_at"] = fallback_datetime_utc.isoformat().replace('+00:00', 'Z')
+
                 stmt = select(DailyCommit).where(
                     DailyCommit.project == project,
                     DailyCommit.sha == commit["sha"],
@@ -509,6 +518,7 @@ class DailySummaryService:
                     existing.full_message = commit.get("full_message", commit["message"])
                     existing.author = commit["author"]
                     existing.author_email = commit.get("author_email", "")
+                    existing.committed_at = self._parse_datetime(commit.get("committed_at"))
                     existing.pr_number = commit.get("pr_number")
                     existing.pr_title = commit.get("pr_title")
                     existing.pr_description = commit.get("pr_description")
